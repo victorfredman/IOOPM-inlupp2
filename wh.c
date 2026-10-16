@@ -60,6 +60,7 @@ void ioopm_wh_destroy(wh_t *wh){
         ioopm_list_iterator_t *list_it = ioopm_list_iterator_create(merch->locations);
         while (!ioopm_list_iterator_at_end(list_it)) {
             shelf_t *shelf = ioopm_list_iterator_current(list_it).p;
+            free(shelf->name);
             free(shelf);
             ioopm_list_iterator_advance(list_it);
         }
@@ -159,8 +160,7 @@ bool ioopm_wh_replenish(wh_t *wh, char *merch_name, char *shelf_name, int quanti
         if (strcmp(current_merch_on_shelf, merch_name) != 0) {
             return false;
         }
-    } // <-- Här tog jag bort det extra } som stängde funktionen för tidigt!
-
+    }
     // 3. Leta i varans befintliga hyllor
     bool shelf_found = false;
     ioopm_list_iterator_t *it = ioopm_list_iterator_create(merch->locations); 
