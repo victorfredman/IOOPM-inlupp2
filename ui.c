@@ -166,10 +166,10 @@ void ui_replenish(wh_t* db){
     int increase = ask_question_int("\nIncrease by: ");
 
     if (!ioopm_wh_replenish(db, merch_name, shelf_name, increase)){
-        printf("Fail");
+        printf("Fail\n");
     }
     else {
-        printf("Stock updated");
+        printf("Stock updated\n");
     }
     free(shelf_name);
     free(merch_name);
@@ -180,13 +180,16 @@ void ui_show_stock(wh_t* db){
     char* answer= ask_question_string("Merch: ");
     ioopm_list_t* locs = ioopm_show_stock(db, answer);
     ioopm_list_iterator_t* iter = ioopm_list_iterator_create(locs);
-    
+
     while (!ioopm_list_iterator_at_end(iter)){
         elem_t current = ioopm_list_iterator_current(iter);
-        
+        shelf_t* shelf = current.p;
+        printf("%s, ", shelf->name);
+        printf("%zu st\n", shelf->size);
+        ioopm_list_iterator_advance(iter);
     }
 
-
+    ioopm_list_iterator_destroy(iter);
 }
 
 
@@ -213,6 +216,9 @@ void event_loop(wh_t* db)
     }
     if (answer=='P'){
         ui_replenish(db);
+    }
+    if (answer=='S'){
+        ui_show_stock(db);
     }
 
     }
