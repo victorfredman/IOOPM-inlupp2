@@ -11,7 +11,6 @@ void test_create(){
   ioopm_wh_destroy(wt);
 
 }
-
 void test_add_merch(){
 
   wh_t *wt = ioopm_wh_create();

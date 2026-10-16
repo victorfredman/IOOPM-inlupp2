@@ -27,11 +27,14 @@
 }
 */
 
-answer_t make_int(char *str) {
-    return (answer_t) { .int_value = atoi(str) };
+static answer_t make_int(char *str)
+{
+    return (answer_t) { .int_value = atoi(str) }; //Kompilatorn klagade på att vi fick in fel typ i ask question 
+                                                  //int och string så behövde lägga till dessa så de returnerar rätt typ
 }
 
-answer_t make_string(char *str) {
+static answer_t make_string(char *str)
+{
     return (answer_t) { .string_value = strdup(str) };
 }
 

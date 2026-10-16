@@ -228,6 +228,7 @@ int ioopm_wh_edit_merch(wh_t *wh, char *old_name, merch_t *edit)
     }
 
     merch_t *old_merch = result.p;
+
     ioopm_hash_table_remove(wh->name_to_merch, string_elem(old_name));
 
     free(old_merch->name);
@@ -238,6 +239,19 @@ int ioopm_wh_edit_merch(wh_t *wh, char *old_name, merch_t *edit)
     old_merch->price = edit->price;
 
     ioopm_hash_table_insert(wh->name_to_merch,string_elem(old_merch->name),ptr_elem(old_merch));
+
+    //Har lagt till nu så att den ändrar i shelf_to_merch också!
+
+    ioopm_list_iterator_t *it = ioopm_list_iterator_create(old_merch->locations);
+
+    while(!ioopm_list_iterator_at_end(it)){
+
+        shelf_t *shelf = ioopm_list_iterator_current(it).p;
+        ioopm_hash_table_insert(wh->shelf_to_name, string_elem(shelf->name), string_elem(old_merch->name));
+        ioopm_list_iterator_advance(it);
+    }
+
+    ioopm_list_iterator_destroy(it);
 
     return 0;
 }
