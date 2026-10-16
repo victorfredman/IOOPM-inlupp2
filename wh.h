@@ -29,11 +29,20 @@ struct shelf {
     size_t size;
 };
 
+struct cart {
+    int id;
+    ioopm_hash_table_t *items;
+};
+
 struct wh {
     ioopm_hash_table_t *name_to_merch;
     ioopm_hash_table_t *shelf_to_name;
+    ioopm_hash_table_t *carts;
+    int carts_id;
 };
+
 void merch_destroy(merch_t *merch);
+int ioopm_wh_create_cart(wh_t *wh);
 merch_t* create_merch(char* name, char* desc, int price);
 merch_t* ioopm_wh_get_merch(wh_t* wh, char* name);
 wh_t* ioopm_wh_create(void);

@@ -13,14 +13,26 @@
 #include "common.h"
 #include "hash_table_iterator.h"
 #include "hash_table_struct.h"
+#include "hash_functions.h"
 #include "utils.h"
 
 wh_t* ioopm_wh_create(void){
     wh_t *wh = malloc(sizeof(wh_t));
     wh->name_to_merch = ioopm_hash_table_create(ioopm_string_knr_hash, ioopm_string_eq);
     wh->shelf_to_name = ioopm_hash_table_create(ioopm_string_knr_hash, ioopm_string_eq);
+    wh->carts = ioopm_hash_table_create(ioopm_int_knr_hash, ioopm_int_eq);
+    wh->carts_id = 1; //Behövs så vi slipper leta igenom alla carts för att hitta ett ledigt id
     return wh;
     //om wh=null???
+}
+
+static cart_t *create_cart(int id){
+
+    cart_t *cart = calloc(1, sizeof(cart_t));
+    cart->id = id;
+    cart->items = ioopm_hash_table_create(ioopm_string_knr_hash, ioopm_string_eq);
+
+    return cart;
 }
 
 merch_t* create_merch(char* name, char* desc, int price){
@@ -31,6 +43,15 @@ merch_t* create_merch(char* name, char* desc, int price){
     merch->locations = ioopm_list_create();
     return merch;
 
+}
+
+int ioopm_wh_create_cart(wh_t *wh){
+
+    int new_id = wh->carts_id + 1;
+    cart_t *new_cart = create_cart(new_id);
+    ioopm_hash_table_insert(wh->carts, int_elem(new_id), ptr_elem(new_cart));
+
+    return new_id;
 }
 
 /*
@@ -73,11 +94,27 @@ void ioopm_wh_destroy(wh_t *wh){
         ioopm_hash_table_iterator_advance(it);
 
     }
-
     ioopm_hash_table_iterator_destroy(it);
+
+    ioopm_hash_table_iterator_t *iter = ioopm_hash_table_iterator_create(wh->carts);
+
+    while(!ioopm_hash_table_iterator_at_end(iter)){
+
+        cart_t *cart = ioopm_hash_table_iterator_current_value(iter).p;
+
+        ioopm_hash_table_destroy(cart->items);
+
+        free(cart);
+
+        ioopm_hash_table_iterator_advance(iter);
+
+    }
+    ioopm_hash_table_iterator_destroy(iter);
 
     ioopm_hash_table_destroy(wh->name_to_merch);
     ioopm_hash_table_destroy(wh->shelf_to_name);
+    ioopm_hash_table_destroy(wh->carts);
+
 
     free(wh);
 }
