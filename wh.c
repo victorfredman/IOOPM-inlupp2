@@ -245,6 +245,16 @@ int ioopm_wh_edit_merch(wh_t *wh, char *old_name, char* name, char* desc, int pr
     old_merch->price = price;
 
     ioopm_hash_table_insert(wh->name_to_merch,string_elem(old_merch->name),ptr_elem(old_merch));
+    ioopm_list_iterator_t *it = ioopm_list_iterator_create(old_merch->locations);
+
+    while(!ioopm_list_iterator_at_end(it)){
+
+        shelf_t *shelf = ioopm_list_iterator_current(it).p;
+        ioopm_hash_table_insert(wh->shelf_to_name, string_elem(shelf->name), string_elem(old_merch->name));
+        ioopm_list_iterator_advance(it);
+    }
+
+    ioopm_list_iterator_destroy(it);
 
     return 0;
 }
