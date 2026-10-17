@@ -11,11 +11,10 @@
 #include "common.h"
 
 typedef struct merch merch_t;
-
 typedef struct shelf shelf_t;
 typedef struct wh wh_t;
-typedef struct order_item order_item_t;
 typedef struct cart cart_t;
+
 
 struct merch {
     char *name;
@@ -32,7 +31,14 @@ struct shelf {
 struct wh {
     ioopm_hash_table_t *name_to_merch;
     ioopm_hash_table_t *shelf_to_name;
+    ioopm_hash_table_t* carts;
 };
+
+struct cart {
+    int id;
+    ioopm_hash_table_t *items;
+};
+
 void merch_destroy(merch_t *merch);
 merch_t* create_merch(char* name, char* desc, int price);
 merch_t* ioopm_wh_get_merch(wh_t* wh, char* name);
@@ -42,5 +48,7 @@ bool ioopm_wh_add_merch(wh_t *wh, char *name, char *desc, int price);
 ioopm_list_t *ioopm_wh_list_merchandise(wh_t *wh);
 bool ioopm_wh_remove_merch(wh_t *wh, char* name);
 ioopm_list_t *ioopm_show_stock(wh_t *db, char *merch_name);
-int ioopm_wh_edit_merch(wh_t* wh, char* old_name, merch_t* edit);
+int ioopm_wh_edit_merch(wh_t* wh, char* old_name, char* name, char* desc, int price);
 bool ioopm_wh_replenish(wh_t *wh, char *merch_name, char *shelf_name, int quantity);
+cart_t* ioopm_wh_create_cart(int id);
+void ioopm_wh_remove_cart(cart_t* cart);

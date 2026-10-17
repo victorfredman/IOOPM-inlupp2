@@ -37,7 +37,7 @@ void print_menu(){
 
 
 char ask_question_menu(void){
-    const char *valid_chars = "ALTDREGPHS+-=O";
+    const char *valid_chars = "ALTDREGPCHS+-=O";
     
     while (true){
         print_menu();
@@ -136,11 +136,9 @@ void ui_edit_merch(wh_t *db)
     char *desc = ask_question_string("New description: ");
     int price = ask_question_int("New price: ");
 
-    merch_t *edit = create_merch(name, desc, price);
+    if (confirm_edit(name, desc, price)){
 
-    if (confirm_edit(edit->name, edit->desc, edit->price)){
-
-        int result = ioopm_wh_edit_merch(db, old_name, edit);
+        int result = ioopm_wh_edit_merch(db, old_name, name, desc, price);
 
         if (result==0){
             printf("Merch edited successfully!\n");
@@ -157,19 +155,18 @@ void ui_edit_merch(wh_t *db)
     }
 
     free(old_name);
-    merch_destroy(edit);
 }
 
 void ui_replenish(wh_t* db){
-    char* merch_name = ask_question_string("\nMerch: ");
-    char* shelf_name = ask_question_string("\nShelf: ");
-    int increase = ask_question_int("\nIncrease by: ");
+    char* merch_name = ask_question_string("Merch: ");
+    char* shelf_name = ask_question_string("Shelf: ");
+    int increase = ask_question_int("Increase by: ");
 
     if (!ioopm_wh_replenish(db, merch_name, shelf_name, increase)){
-        printf("Fail");
+        printf("Fail\n");
     }
     else {
-        printf("Stock updated");
+        printf("Stock updated\n");
     }
     free(shelf_name);
     free(merch_name);
@@ -177,17 +174,57 @@ void ui_replenish(wh_t* db){
     }
 
 void ui_show_stock(wh_t* db){
+    printf("--------------------\n");
+    printf("      SHOW STOCK    \n");
     char* answer= ask_question_string("Merch: ");
     ioopm_list_t* locs = ioopm_show_stock(db, answer);
+
+    if (locs->size ==0){
+        printf("No items\n");
+    } else {
     ioopm_list_iterator_t* iter = ioopm_list_iterator_create(locs);
-    
     while (!ioopm_list_iterator_at_end(iter)){
         elem_t current = ioopm_list_iterator_current(iter);
-        
+        shelf_t* shelf = current.p;
+        printf("SHELF: %s ", shelf->name);
+        printf("QUANTITY: %zu\n", shelf->size);
+        ioopm_list_iterator_advance(iter);
+    }
+     ioopm_list_iterator_destroy(iter);
     }
 
-
+   
 }
+
+void ui_create_cart(wh_t *db){
+    printf("--------------------\n");
+    printf("     CREATE CART    \n");
+
+    int id = ask_question_int("\nCart id: ");
+    if (ioopm_hash_table_has_key(db->carts, int_elem(id))){
+        printf("ID already exists\n");
+        return;
+    }
+    cart_t *cart = ioopm_wh_create_cart(id);
+
+    ioopm_hash_table_insert(db->carts, int_elem(id), ptr_elem(cart));
+    printf("Cart created\n");
+}
+
+void ui_remove_cart(wh_t* db){
+    printf("--------------------\n");
+    printf("     REMOVE CART    \n");
+    int id = ask_question_int("ID to remove: ");
+    if (!ioopm_hash_table_has_key(db->carts, int_elem(id))){
+        printf("ID %d doesn't exist", id);
+    }
+    else {
+        ioopm_hash_table_remove(db->carts, int_elem(id));
+        printf("Cart (ID:%d) removed\n", id);
+    }
+}
+
+
 
 
 void event_loop(wh_t* db)
@@ -205,7 +242,7 @@ void event_loop(wh_t* db)
     if (answer=='L'){
         ui_list_merch(db);
     }
-    if (answer=='R'){
+    if (answer=='D'){
         ui_remove_merch(db);
     }
     if (answer=='E'){
@@ -214,10 +251,20 @@ void event_loop(wh_t* db)
     if (answer=='P'){
         ui_replenish(db);
     }
+    if (answer=='S'){
+        ui_show_stock(db);
+    }
+    if (answer=='C'){
+        ui_create_cart(db);
+    }
+    if (answer=='R'){
+        ui_remove_cart(db);
+    }
 
     }
 }
 
+//bara för att testa list funktionerna, går ej att freea dom elr deras fält då dom ej är dynamiskt allokerade
 static void stock(wh_t* db){
     ioopm_wh_add_merch(db, "Kaffe", "Mörkrost", 10);
     ioopm_wh_add_merch(db, "Te", "Svart", 5);
