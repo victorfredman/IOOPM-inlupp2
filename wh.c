@@ -23,20 +23,14 @@ wh_t* ioopm_wh_create(void){
     //om wh=null???
 }
 
-merch_t *create_merch(char *name, char *desc, int price)
-{
+merch_t* create_merch(char* name, char* desc, int price){
     merch_t *merch = calloc(1, sizeof(merch_t));
-
-    if (merch == NULL) {
-        return NULL;
-    }
-
     merch->name = name;
     merch->desc = desc;
     merch->price = price;
     merch->locations = ioopm_list_create();
-
     return merch;
+
 }
 
 /*
@@ -47,12 +41,10 @@ static shelf_t* shelf_create(char* name, int quantity){
     return new_shelf;
 }*/
 
-static void shelf_destroy(shelf_t *shelf)
-{
+static void shelf_destroy(shelf_t *shelf) {
     if (shelf == NULL) {
         return;
     }
-    printf("Destroy shelf: %p, name: %p (%s)\n",(void *) shelf,(void *) shelf->name,shelf->name);
     free(shelf->name);
     free(shelf);
 }
@@ -68,6 +60,7 @@ void ioopm_wh_destroy(wh_t *wh){
         ioopm_list_iterator_t *list_it = ioopm_list_iterator_create(merch->locations);
         while (!ioopm_list_iterator_at_end(list_it)) {
             shelf_t *shelf = ioopm_list_iterator_current(list_it).p;
+            free(shelf->name);
             free(shelf);
             ioopm_list_iterator_advance(list_it);
         }
@@ -89,12 +82,10 @@ void ioopm_wh_destroy(wh_t *wh){
     free(wh);
 }
 
-void merch_destroy(merch_t *merch)
-{
-    if (merch == NULL) {
+void merch_destroy(merch_t *merch) {
+    if (merch == NULL){
         return;
     }
-
     free(merch->name);
     free(merch->desc);
     ioopm_list_destroy(merch->locations);
@@ -129,32 +120,28 @@ merch_t* ioopm_wh_get_merch(wh_t* wh, char* name){
         return NULL;
     }
 }
-bool ioopm_wh_remove_merch(wh_t *wh, char *name)
+
+bool ioopm_wh_remove_merch(wh_t *wh, char* name)
 {
-    merch_t *m = ioopm_wh_get_merch(wh, name);
+   merch_t* m = ioopm_wh_get_merch(wh, name);
+    ioopm_list_iterator_t *it =ioopm_list_iterator_create(m->locations);
+    while (!ioopm_list_iterator_at_end(it)){
+        elem_t shelf_elem = ioopm_list_iterator_current(it);
+        shelf_t *shelf = shelf_elem.p;
 
-    if (m==NULL) {
-        return false;
-    }
-
-    ioopm_list_iterator_t *it = ioopm_list_iterator_create(m->locations);
-    while (!ioopm_list_iterator_at_end(it)) {
-        shelf_t *shelf = ioopm_list_iterator_current(it).p;
         ioopm_hash_table_remove(wh->shelf_to_name,string_elem(shelf->name));
+
         shelf_destroy(shelf);
+
         ioopm_list_iterator_advance(it);
     }
 
     ioopm_list_iterator_destroy(it);
-
-    ioopm_hash_table_remove(
-        wh->name_to_merch,
-        string_elem(name)
-    );
-
+    ioopm_hash_table_remove(wh->name_to_merch, string_elem(name));
     merch_destroy(m);
     return true;
 }
+
 
 bool ioopm_wh_replenish(wh_t *wh, char *merch_name, char *shelf_name, int quantity)
 {
@@ -173,8 +160,7 @@ bool ioopm_wh_replenish(wh_t *wh, char *merch_name, char *shelf_name, int quanti
         if (strcmp(current_merch_on_shelf, merch_name) != 0) {
             return false;
         }
-    } // <-- Här tog jag bort det extra } som stängde funktionen för tidigt!
-
+    }
     // 3. Leta i varans befintliga hyllor
     bool shelf_found = false;
     ioopm_list_iterator_t *it = ioopm_list_iterator_create(merch->locations); 
@@ -242,6 +228,7 @@ int ioopm_wh_edit_merch(wh_t *wh, char *old_name, merch_t *edit)
     }
 
     merch_t *old_merch = result.p;
+
     ioopm_hash_table_remove(wh->name_to_merch, string_elem(old_name));
 
     free(old_merch->name);
@@ -252,6 +239,19 @@ int ioopm_wh_edit_merch(wh_t *wh, char *old_name, merch_t *edit)
     old_merch->price = edit->price;
 
     ioopm_hash_table_insert(wh->name_to_merch,string_elem(old_merch->name),ptr_elem(old_merch));
+
+    //Har lagt till nu så att den ändrar i shelf_to_merch också!
+
+    ioopm_list_iterator_t *it = ioopm_list_iterator_create(old_merch->locations);
+
+    while(!ioopm_list_iterator_at_end(it)){
+
+        shelf_t *shelf = ioopm_list_iterator_current(it).p;
+        ioopm_hash_table_insert(wh->shelf_to_name, string_elem(shelf->name), string_elem(old_merch->name));
+        ioopm_list_iterator_advance(it);
+    }
+
+    ioopm_list_iterator_destroy(it);
 
     return 0;
 }

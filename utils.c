@@ -26,6 +26,18 @@
   return result;
 }
 */
+
+static answer_t make_int(char *str)
+{
+    return (answer_t) { .int_value = atoi(str) }; //Kompilatorn klagade på att vi fick in fel typ i ask question 
+                                                  //int och string så behövde lägga till dessa så de returnerar rätt typ
+}
+
+static answer_t make_string(char *str)
+{
+    return (answer_t) { .string_value = strdup(str) };
+}
+
 void clear_input_buffer(void)
 {
     int c;
@@ -99,7 +111,7 @@ answer_t ask_question(char *question, check_func *check, convert_func *convert)
    char buf[buf_size];
 
    do {
-    printf("%s ", question);
+    printf("%s\n", question);
     read_string(buf, buf_size);
 
    }
@@ -110,13 +122,13 @@ answer_t ask_question(char *question, check_func *check, convert_func *convert)
 
 int ask_question_int(char *question)
 {
-  answer_t answer = ask_question(question, is_number, (convert_func *) atoi);
+  answer_t answer = ask_question(question, is_number, make_int);
   return answer.int_value; // svaret som ett heltal
 }
 
 char *ask_question_string(char *question)
 {
-  return ask_question(question, not_empty, (convert_func *) strdup).string_value;
+  return ask_question(question, not_empty, make_string).string_value;
 }
 
 /*char *ask_question_string(char *question, char *buf, int buf_siz){
