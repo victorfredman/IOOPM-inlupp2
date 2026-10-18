@@ -43,10 +43,6 @@ merch_t *create_merch(char *name, char *desc, int price)
 
 static void shelf_destroy(shelf_t *shelf)
 {
-    if (shelf == NULL) {
-        return;
-    }
-    printf("Destroy shelf: %p, name: %p (%s)\n",(void *) shelf,(void *) shelf->name,shelf->name);
     free(shelf->name);
     free(shelf);
 }
@@ -294,6 +290,46 @@ void ioopm_wh_remove_cart(cart_t* cart){
     free(cart);
     ioopm_hash_table_destroy(cart->items);
 }
+
+static cart_t* get_cart(wh_t* wh, int cart_id){
+    elem_t result;
+    ioopm_hash_table_lookup(wh->carts, int_elem(cart_id), &result);
+    cart_t* cart = result.p;
+    return cart;
+
+}
+
+static bool enough_in_stock(merch_t* merch, int quantity){
+    int stock = wh_count_stock(merch);
+    if (stock<quantity){
+        return false;
+
+    } else {
+        return true;
+    }
+
+}
+
+int ioopm_wh_add_to_cart(wh_t* db, int cart_id, char* merch_name, int quantity){
+    //om id ej finns
+    if (!ioopm_hash_table_has_key(db->carts, int_elem(cart_id))){
+        return -1;
+    }
+    //om varan man vill lägga till ej finns
+    if (!ioopm_hash_table_has_key(db->name_to_merch, string_elem(merch_name))){
+        return -2;
+    }
+    //annars finns båda
+    cart_t* cart = get_cart(db, cart_id);
+    //finns de tillräckligt många?
+    merch_t* merch = ioopm_wh_get_merch(db, merch_name);
+    if (!enough_in_stock(merch, quantity)){
+        return -3;
+    }
+    ioopm_hash_table_insert(cart->items, string_elem(merch->name), int_elem(quantity));
+    return 1;
+}
+
 
 
 

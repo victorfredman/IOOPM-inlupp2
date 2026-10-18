@@ -224,6 +224,25 @@ void ui_remove_cart(wh_t* db){
     }
 }
 
+void ui_add_to_cart(wh_t* db){
+    int id = ask_question_int("\nCart ID: ");
+    char* merch_name = ask_question_string("\nMerch: ");
+    int quantity = ask_question_int("\nQuantity: ");
+    int result = ioopm_wh_add_to_cart(db, id, merch_name, quantity);
+    if (result==-1){
+        printf("ID doesn't exist\n");
+    } if (result==-2){
+        printf("\nMerch name doesn't exist\n");
+        return;
+    } if (result==-3){
+        printf("Not enough items in stock\n");
+    } else {
+        printf("%d %s was added to cart %d\n", quantity, merch_name, id);
+    }
+    free(merch_name);
+    return;
+}
+
 
 
 
@@ -259,6 +278,9 @@ void event_loop(wh_t* db)
     }
     if (answer=='R'){
         ui_remove_cart(db);
+    }
+    if (answer=='+'){
+        ui_add_to_cart(db);
     }
 
     }

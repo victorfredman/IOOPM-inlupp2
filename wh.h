@@ -52,3 +52,4 @@ int ioopm_wh_edit_merch(wh_t* wh, char* old_name, char* name, char* desc, int pr
 bool ioopm_wh_replenish(wh_t *wh, char *merch_name, char *shelf_name, int quantity);
 cart_t* ioopm_wh_create_cart(int id);
 void ioopm_wh_remove_cart(cart_t* cart);
+int ioopm_wh_add_to_cart(wh_t* db, int cart_id, char* merch_name, int quantity);
