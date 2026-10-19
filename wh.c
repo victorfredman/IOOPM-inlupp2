@@ -16,6 +16,30 @@
 #include "hash_functions.h"
 #include "utils.h"
 
+struct merch {
+    char *name;
+    char *desc;
+    int price;
+    ioopm_list_t *locations;
+};
+
+struct shelf {
+    char *name;
+    size_t size;
+};
+
+struct cart {
+    int id;
+    ioopm_hash_table_t *items;
+};
+
+struct wh {
+    ioopm_hash_table_t *name_to_merch;
+    ioopm_hash_table_t *shelf_to_name;
+    ioopm_hash_table_t *carts;
+    int carts_id;
+};
+
 wh_t* ioopm_wh_create(void){
     wh_t *wh = malloc(sizeof(wh_t));
     wh->name_to_merch = ioopm_hash_table_create(ioopm_string_knr_hash, ioopm_string_eq);
@@ -43,15 +67,6 @@ merch_t* create_merch(char* name, char* desc, int price){
     merch->locations = ioopm_list_create();
     return merch;
 
-}
-
-int ioopm_wh_create_cart(wh_t *wh){
-
-    int new_id = wh->carts_id + 1;
-    cart_t *new_cart = create_cart(new_id);
-    ioopm_hash_table_insert(wh->carts, int_elem(new_id), ptr_elem(new_cart));
-
-    return new_id;
 }
 
 /*
@@ -317,6 +332,58 @@ int wh_count_stock(merch_t *merch){
     return total;
 }
 
+int ioopm_wh_create_cart(wh_t *wh){
+
+    int new_id = wh->carts_id + 1;
+    cart_t *new_cart = create_cart(new_id);
+    ioopm_hash_table_insert(wh->carts, int_elem(new_id), ptr_elem(new_cart));
+
+    return new_id;
+}
+
+void ioopm_wh_remove_cart(cart_t* cart){
+    ioopm_hash_table_destroy(cart->items);
+    free(cart);
+}
+
+static cart_t* get_cart(wh_t* wh, int cart_id){
+    elem_t result;
+    ioopm_hash_table_lookup(wh->carts, int_elem(cart_id), &result);
+    cart_t* cart = result.p;
+    return cart;
+
+}
+
+static bool enough_in_stock(merch_t* merch, int quantity){
+    int stock = wh_count_stock(merch);
+    if (stock<quantity){
+        return false;
+
+    } else {
+        return true;
+    }
+
+}
+
+int ioopm_wh_add_to_cart(wh_t* db, int cart_id, char* merch_name, int quantity){
+    //om id ej finns
+    if (!ioopm_hash_table_has_key(db->carts, int_elem(cart_id))){
+        return -1;
+    }
+    //om varan man vill lägga till ej finns
+    if (!ioopm_hash_table_has_key(db->name_to_merch, string_elem(merch_name))){
+        return -2;
+    }
+    //annars finns båda
+    cart_t* cart = get_cart(db, cart_id);
+    //finns de tillräckligt många?
+    merch_t* merch = ioopm_wh_get_merch(db, merch_name);
+    if (!enough_in_stock(merch, quantity)){
+        return -3;
+    }
+    ioopm_hash_table_insert(cart->items, string_elem(merch->name), int_elem(quantity));
+    return 1;
+}
 
 
 
