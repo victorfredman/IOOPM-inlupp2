@@ -10,11 +10,19 @@
 #include "linked_list.h"
 #include "common.h"
 
+/// @brief Represents a specific merchandise item in the warehouse.
 typedef struct merch merch_t;
 
+/// @brief Represents a physical storage location (shelf) and its current stock quantity.
 typedef struct shelf shelf_t;
+
+/// @brief Represents the main warehouse system managing merchandise, shelves, and carts. 
 typedef struct wh wh_t;
+
+/// @brief Represents a reserved item inside a shopping cart, tracking the merchandise and quantity.
 typedef struct order_item order_item_t;
+
+/// @brief Represents a shopping cart used by a customer to reserve items before checkout.
 typedef struct cart cart_t;
 
 /// @brief Frees the memory allocated for a specific merchandise (including its name, description, and shelves).
