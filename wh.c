@@ -13,8 +13,6 @@
 #include "hash_table.h"
 #include "common.h"
 #include "hash_table_iterator.h"
-#include "hash_table_struct.h"
-#include "hash_functions.h"
 #include "utils.h"
 
 struct merch {  
@@ -95,7 +93,7 @@ void ioopm_wh_destroy(wh_t *wh){
         ioopm_list_iterator_t *list_it = ioopm_list_iterator_create(merch->locations);
         while (!ioopm_list_iterator_at_end(list_it)) {
             shelf_t *shelf = ioopm_list_iterator_current(list_it).p;
-            free(shelf);
+            shelf_destroy(shelf);
             ioopm_list_iterator_advance(list_it);
         }
         ioopm_list_iterator_destroy(list_it);
@@ -271,16 +269,16 @@ ioopm_list_t *ioopm_wh_list_merchandise(wh_t *wh){
 }
 
 
-int ioopm_wh_edit_merch(wh_t *wh, char *old_name, char* name, char* desc, int price)
+bool ioopm_wh_edit_merch(wh_t *wh, char *old_name, char* name, char* desc, int price)
 {
     elem_t result;
 
     if (!ioopm_hash_table_lookup(wh->name_to_merch, string_elem(old_name), &result)){
-        return -1;
+        return false;
     }
 
     if (strcmp(old_name, name) != 0 && ioopm_hash_table_has_key(wh->name_to_merch, string_elem(name))){
-        return -2;
+        return false;
     }
 
     merch_t *old_merch = result.p;
@@ -305,7 +303,7 @@ int ioopm_wh_edit_merch(wh_t *wh, char *old_name, char* name, char* desc, int pr
 
     ioopm_list_iterator_destroy(it);
 
-    return 0;
+    return true;
 }
     
 ioopm_list_t *ioopm_show_stock(wh_t *db, char *merch_name){
@@ -334,7 +332,8 @@ int wh_count_stock(merch_t *merch){
 
 int ioopm_wh_create_cart(wh_t *wh){
 
-    int new_id = wh->carts_id + 1;
+    wh->carts_id += 1;
+    int new_id = wh->carts_id;
     cart_t *new_cart = create_cart(new_id);
     ioopm_hash_table_insert(wh->carts, int_elem(new_id), ptr_elem(new_cart));
 
@@ -380,23 +379,26 @@ bool ioopm_wh_remove_from_cart(wh_t *db, int cart_id, char* merch_name, int quan
     }
 
     elem_t result;
-    
     ioopm_hash_table_lookup(cart->items, string_elem(merch_name), &result);
 
     int current_quantity = result.i;
 
+    merch_t *merch = ioopm_wh_get_merch(db, merch_name);
+
     if(current_quantity > quantity){
         ioopm_hash_table_insert(cart->items, string_elem(merch_name), int_elem(current_quantity - quantity));
+        merch->reserved -= quantity; 
         return true;
     }
 
     if(quantity == current_quantity){
         ioopm_hash_table_remove(cart->items, string_elem(merch_name));
+        merch->reserved -= quantity; 
         return true;
     }
 
     return false;
-};
+}
 
 
 bool ioopm_wh_add_to_cart(wh_t* db, int cart_id, char* merch_name, int quantity){
@@ -458,6 +460,28 @@ int ioopm_wh_calculate_cost(wh_t *db, int cart_id){
     return result;
 }
 
+bool ioopm_wh_cart_checkout(wh_t *wt, int cart_id){
+
+    if(!ioopm_hash_table_has_key(wt->carts, int_elem(cart_id))){
+        return false;
+    }
+
+    cart_t *carts = get_cart(wt, cart_id);
+    
+    ioopm_hash_table_iterator_t *it = ioopm_hash_table_iterator_create(carts->items);
+
+    while(!ioopm_hash_table_iterator_at_end(it)){
+
+        elem_t current_key = ioopm_hash_table_iterator_current_key(it);
+        elem_t current_value = ioopm_hash_table_iterator_current_value(it);
+
+        merch_t *merch = ioopm_wh_get_merch(wt, current_key.s);
+        
+        
+    }
+
+
+}
 
 //Getters för att kunna hämta ut objekt i ui.c filen, för jag har flyttat struktarna till denna fil nu
 char *ioopm_merch_get_name(merch_t *merch) {
