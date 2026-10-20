@@ -89,7 +89,7 @@ void ui_list_merch(wh_t *db){
     while (!ioopm_list_iterator_at_end(iter)) {
         elem_t current = ioopm_list_iterator_current(iter);
         merch_t *item = current.p;
-        printf("%s\n", item->name);
+        printf("%s\n", ioopm_merch_get_name(item));
         ioopm_list_iterator_advance(iter);
     }
     ioopm_list_iterator_destroy(iter);
@@ -138,7 +138,7 @@ void ui_edit_merch(wh_t *db)
 
     merch_t *edit = create_merch(name, desc, price);
 
-    if (confirm_edit(edit->name, edit->desc, edit->price)){
+    if (confirm_edit(ioopm_merch_get_name(edit), ioopm_merch_get_desc(edit), ioopm_merch_get_price(edit))){
 
         int result = ioopm_wh_edit_merch(db, old_name, edit);
 

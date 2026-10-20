@@ -95,10 +95,44 @@ int ioopm_wh_edit_merch(wh_t* wh, char* old_name, merch_t* edit);
 /// @return true if successful, false if the shelf is already occupied by a different merchandise.
 bool ioopm_wh_replenish(wh_t *wh, char *merch_name, char *shelf_name, int quantity);
 
+/// @brief Removes a cart from the warehouse
+/// @param wh Pointer to the warehouse  
+/// @param cart_id ID of the cart that will be removed
+void ioopm_wh_remove_cart(wh_t *wh, int cart_id);
+
 /// @brief Reserves a specified quantity of a merchandise and adds it to a specific shopping cart.
 /// @param db Pointer to the warehouse.
 /// @param cart_id The ID of the shopping cart.
 /// @param merch_name The name of the merchandise.
 /// @param quantity The amount to be added to the cart.
-/// @return A status code (e.g., 0 on success, or an error code if the merchandise is missing or stock is insufficient).
-int ioopm_wh_add_to_cart(wh_t* db, int cart_id, char* merch_name, int quantity);
+/// @return A bool that represents if the adding was successfull or not
+bool ioopm_wh_add_to_cart(wh_t* db, int cart_id, char* merch_name, int quantity);
+
+/// @brief Getter function to help ui.c to get the right values
+/// @param merch the merch you want to collect information from
+/// @return The name of the merch
+char *ioopm_merch_get_name(merch_t *merch);
+
+/// @brief Getter function to help ui.c to get the right values
+/// @param merch the merch you want to collect information from 
+/// @return The price of the merch
+int ioopm_merch_get_price(merch_t *merch);
+
+/// @brief Getter function to help ui.c to get the right values
+/// @param merch the merch you want to collect information from 
+/// @return The description of the merch
+char *ioopm_merch_get_desc(merch_t *merch);
+
+/// @brief Removes a number of items from the cart
+/// @param db pointer to the warehouse
+/// @param cart_id The ID of the shopping cart
+/// @param merch_name The name of the merchandise
+/// @param quantity The amount to be removed from the cart
+/// @return A bool that represents if the adding was successfull or not
+bool ioopm_wh_remove_from_cart(wh_t *db, int cart_id, char* merch_name, int quantity);
+
+/// @brief Calculate the costs of a shopping cart
+/// @param db pointer to the warehouse
+/// @param cart_id The ID of the shopping cart
+/// @return The total cost of the shopping cart
+int ioopm_wh_calculate_cost(wh_t *db, int cart_id);
