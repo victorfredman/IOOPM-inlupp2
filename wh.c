@@ -177,6 +177,11 @@ bool ioopm_wh_remove_merch(wh_t *wh, char *name)
         return false;
     }
 
+    if (m->reserved > 0) {  
+    // Varan ligger i minst en kundvagn! Vi tillåter inte redigering.
+    return false;
+    }
+
     ioopm_list_iterator_t *it = ioopm_list_iterator_create(m->locations);
     while (!ioopm_list_iterator_at_end(it)) {
         shelf_t *shelf = ioopm_list_iterator_current(it).p;
@@ -282,6 +287,12 @@ int ioopm_wh_edit_merch(wh_t *wh, char *old_name, char* name, char* desc, int pr
     }
 
     merch_t *old_merch = result.p;
+
+    if (old_merch->reserved > 0) {
+    // Varan ligger i minst en kundvagn! Vi tillåter inte redigering.
+    return false;
+    }
+
     ioopm_hash_table_remove(wh->name_to_merch, string_elem(old_name));
 
     free(old_merch->name);
@@ -460,7 +471,7 @@ int ioopm_wh_calculate_cost(wh_t *db, int cart_id){
     return result;
 }
 
-/*bool ioopm_wh_cart_checkout(wh_t *wt, int cart_id){
+bool ioopm_wh_cart_checkout(wh_t *wt, int cart_id){
 
     if(!ioopm_hash_table_has_key(wt->carts, int_elem(cart_id))){
         return false;
@@ -475,11 +486,36 @@ int ioopm_wh_calculate_cost(wh_t *db, int cart_id){
         elem_t current_key = ioopm_hash_table_iterator_current_key(it);
         elem_t current_value = ioopm_hash_table_iterator_current_value(it);
 
+        int left_to_remove = current_value.i;
+
         merch_t *merch = ioopm_wh_get_merch(wt, current_key.s);
-        
-        
+
+        while(left_to_remove > 0){
+
+            elem_t shelf_elem = ioopm_list_get(merch->locations, 0);
+            shelf_t *shelf = shelf_elem.p;
+
+            if(shelf->size > left_to_remove){
+                shelf->size -= left_to_remove;
+                left_to_remove = 0;
+            }
+
+            else{
+                left_to_remove -= shelf->size;
+                ioopm_hash_table_remove(wt->shelf_to_name, string_elem(shelf->name));
+                ioopm_list_remove(merch->locations, 0);
+                shelf_destroy(shelf);
+            }
+        }
+
+        merch->reserved -= current_value.i;
+
+        ioopm_hash_table_iterator_advance(it);
     }
-}*/
+    ioopm_hash_table_iterator_destroy(it);
+    ioopm_wh_remove_cart(wt, cart_id);
+    return true;
+}
 
 //Getters för att kunna hämta ut objekt i ui.c filen, för jag har flyttat struktarna till denna fil nu
 char *ioopm_merch_get_name(merch_t *merch) {
