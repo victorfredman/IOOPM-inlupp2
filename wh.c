@@ -269,16 +269,16 @@ ioopm_list_t *ioopm_wh_list_merchandise(wh_t *wh){
 }
 
 
-bool ioopm_wh_edit_merch(wh_t *wh, char *old_name, char* name, char* desc, int price)
+int ioopm_wh_edit_merch(wh_t *wh, char *old_name, char* name, char* desc, int price)
 {
     elem_t result;
 
     if (!ioopm_hash_table_lookup(wh->name_to_merch, string_elem(old_name), &result)){
-        return false;
+        return -1;
     }
 
     if (strcmp(old_name, name) != 0 && ioopm_hash_table_has_key(wh->name_to_merch, string_elem(name))){
-        return false;
+        return -2;
     }
 
     merch_t *old_merch = result.p;
@@ -303,7 +303,7 @@ bool ioopm_wh_edit_merch(wh_t *wh, char *old_name, char* name, char* desc, int p
 
     ioopm_list_iterator_destroy(it);
 
-    return true;
+    return 0;
 }
     
 ioopm_list_t *ioopm_show_stock(wh_t *db, char *merch_name){
@@ -460,7 +460,7 @@ int ioopm_wh_calculate_cost(wh_t *db, int cart_id){
     return result;
 }
 
-bool ioopm_wh_cart_checkout(wh_t *wt, int cart_id){
+/*bool ioopm_wh_cart_checkout(wh_t *wt, int cart_id){
 
     if(!ioopm_hash_table_has_key(wt->carts, int_elem(cart_id))){
         return false;
@@ -479,9 +479,7 @@ bool ioopm_wh_cart_checkout(wh_t *wt, int cart_id){
         
         
     }
-
-
-}
+}*/
 
 //Getters för att kunna hämta ut objekt i ui.c filen, för jag har flyttat struktarna till denna fil nu
 char *ioopm_merch_get_name(merch_t *merch) {
@@ -496,7 +494,17 @@ char *ioopm_merch_get_desc(merch_t *merch) {
     return merch->desc;
 }
 
+char *ioopm_shelf_get_name(shelf_t *shelf){
+    return shelf->name;
+}
 
+size_t ioopm_shelf_get_size(shelf_t *shelf){
+    return shelf->size;
+}
+
+ioopm_hash_table_t *ioopm_db_get_carts(wh_t *db){
+    return db->carts;
+}
 
 
 

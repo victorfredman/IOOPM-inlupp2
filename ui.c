@@ -132,30 +132,43 @@ void ui_edit_merch(wh_t *db)
     printf("--------------------\n");
     printf("     EDIT MERCH     \n");
     char *old_name = ask_question_string("Choose merch to edit: ");
+
+    // 1. Kolla om varan faktiskt finns i systemet
+    merch_t *merch = ioopm_wh_get_merch(db, old_name);
+    if (merch == NULL) {
+        printf("Merch not found.\n");
+        free(old_name);
+        return; // Avbryt direkt
+    }
+
+    // 2. Fråga användaren om de nya värdena
     char *name = ask_question_string("New name: ");
     char *desc = ask_question_string("New description: ");
     int price = ask_question_int("New price: ");
 
-    if (confirm_edit(name, desc, price)){
+    // 3. Anropa din snygga confirm_edit-funktion!
+    if (confirm_edit(name, desc, price)) {
+        
+        // Utför själva ändringen i lagret
+        bool success = ioopm_wh_edit_merch(db, old_name, name, desc, price);
 
-    if (confirm_edit(ioopm_merch_get_name(edit), ioopm_merch_get_desc(edit), ioopm_merch_get_price(edit))){
-
-        int result = ioopm_wh_edit_merch(db, old_name, edit);
-
-        if (result==0){
+        if (success) {
             printf("Merch edited successfully!\n");
-        }
-        else if (result==-1){
-            printf("Merch not found.\n");
-        }
-        else if (result==-2){
+        } else {
             printf("Name is already in use.\n");
+            // Om lagret vägrade ta emot ändringen måste vi städa de nya strängarna
+            free(name);
+            free(desc);
         }
-    }
-    else{
+    } 
+    else {
         printf("Edit cancelled.\n");
+        // Användaren tryckte nej, så vi måste städa bort det de precis knappade in
+        free(name);
+        free(desc);
     }
 
+    // Det gamla namnet behövs inte längre
     free(old_name);
 }
 
@@ -188,8 +201,8 @@ void ui_show_stock(wh_t* db){
     while (!ioopm_list_iterator_at_end(iter)){
         elem_t current = ioopm_list_iterator_current(iter);
         shelf_t* shelf = current.p;
-        printf("SHELF: %s ", shelf->name);
-        printf("QUANTITY: %zu\n", shelf->size);
+        printf("SHELF: %s ", ioopm_shelf_get_name(shelf));
+        printf("QUANTITY: %zu\n", ioopm_shelf_get_size(shelf));
         ioopm_list_iterator_advance(iter);
     }
      ioopm_list_iterator_destroy(iter);
@@ -202,26 +215,20 @@ void ui_create_cart(wh_t *db){
     printf("--------------------\n");
     printf("     CREATE CART    \n");
 
-    int id = ask_question_int("\nCart id: ");
-    if (ioopm_hash_table_has_key(db->carts, int_elem(id))){
-        printf("ID already exists\n");
-        return;
-    }
-    cart_t *cart = ioopm_wh_create_cart(id);
+    int cart = ioopm_wh_create_cart(db);
 
-    ioopm_hash_table_insert(db->carts, int_elem(id), ptr_elem(cart));
-    printf("Cart created\n");
+    printf("Cart created with ID: %d\n", cart);
 }
 
 void ui_remove_cart(wh_t* db){
     printf("--------------------\n");
     printf("     REMOVE CART    \n");
     int id = ask_question_int("ID to remove: ");
-    if (!ioopm_hash_table_has_key(db->carts, int_elem(id))){
+    if (!ioopm_hash_table_has_key(ioopm_db_get_carts(db), int_elem(id))){
         printf("ID %d doesn't exist", id);
     }
     else {
-        ioopm_hash_table_remove(db->carts, int_elem(id));
+        ioopm_hash_table_remove(ioopm_db_get_carts(db), int_elem(id));
         printf("Cart (ID:%d) removed\n", id);
     }
 }
