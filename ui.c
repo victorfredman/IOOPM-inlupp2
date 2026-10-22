@@ -262,6 +262,24 @@ void ui_calculate_cost(wh_t* db){
     return;
 }
 
+void ui_remove_from_cart(wh_t* db){
+
+      printf("--------------------\n");
+      printf("  REMOVE FROM CART  \n");
+    int id = ask_question_int("\nCart ID: ");
+    char* merch_name = ask_question_string("\nMerch: ");
+    int quantity = ask_question_int("\nQuantity: ");
+    bool success = ioopm_wh_remove_from_cart(db, id, merch_name, quantity);
+    if (!success){
+        printf("Could not remove item\n");
+    } else {
+        printf("%d %s removed from cart %d\n", quantity, merch_name, id);
+    }
+    free(merch_name);
+    return;
+    
+}
+
 void ui_checkout(wh_t* db){
         printf("--------------------\n");
         printf("      CHECKOUT      \n");
@@ -314,8 +332,14 @@ void event_loop(wh_t* db)
     if (answer=='+'){
         ui_add_to_cart(db);
     }
+    if (answer=='-'){
+        ui_remove_from_cart(db);
+    }
     if (answer=='='){
         ui_calculate_cost(db);
+    }
+    if (answer=='O'){
+        ui_checkout(db);
     }
 
     }

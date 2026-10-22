@@ -25,21 +25,10 @@ typedef struct order_item order_item_t;
 /// @brief Represents a shopping cart used by a customer to reserve items before checkout.
 typedef struct cart cart_t;
 
-/// @brief Frees the memory allocated for a specific merchandise (including its name, description, and shelves).
-/// @param merch Pointer to the merchandise to be destroyed.
-void merch_destroy(merch_t *merch);
-
 /// @brief Creates a new, empty shopping cart and adds it to the warehouse's cart system.
 /// @param wh Pointer to the warehouse.
 /// @return A unique ID (integer) for the newly created shopping cart.
 int ioopm_wh_create_cart(wh_t *wh);
-
-/// @brief Creates a new merchandise and allocates memory for it.
-/// @param name The name of the merchandise.
-/// @param desc The description of the merchandise.
-/// @param price The price of the merchandise.
-/// @return A pointer to the newly created merchandise.
-merch_t* create_merch(char* name, char* desc, int price);
 
 /// @brief Looks up and retrieves a merchandise from the warehouse based on its name.
 /// @param wh Pointer to the warehouse.
@@ -83,8 +72,14 @@ ioopm_list_t *ioopm_show_stock(wh_t *db, char *merch_name);
 /// @brief Updates the name, description, and price of an existing merchandise.
 /// @param wh Pointer to the warehouse.
 /// @param old_name The current name of the merchandise.
-/// @param edit A merch_t struct (or pointer) containing the new information.
-/// @return A status code false or true
+/// @param name The new name
+/// @param desc The new description
+/// @param price The new price
+/// @note Pre-cond: The merchandise cannot exist in a cart. The name cannot be the same as another merchandise. 
+/// @note Pre-cond: Both name and desc must be dynamically allocated on the heap
+/// @note Post-cond: On success, the warehouse takes ownership of name and desc, and the caller must not free them.
+/// @note Post-cond: On fail, the ownership is not transferred.
+/// @return 0 if succsess, -1 if the merch doesn't exist, -2 if the cart id doesn't exist, -4 if the merch is reserved in a cart
 int ioopm_wh_edit_merch(wh_t *wh, char *old_name, char* name, char* desc, int price);
 
 /// @brief Replenishes the stock of a merchandise on a specific shelf. Creates the shelf if it does not exist.
