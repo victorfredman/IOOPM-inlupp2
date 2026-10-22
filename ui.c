@@ -132,15 +132,7 @@ void ui_edit_merch(wh_t *db)
     printf("--------------------\n");
     printf("     EDIT MERCH     \n");
     char *old_name = ask_question_string("Choose merch to edit: ");
-
-    // 1. Kolla om varan faktiskt finns i systemet
-    merch_t *merch = ioopm_wh_get_merch(db, old_name);
-    if (merch == NULL) {
-        printf("Merch not found.\n");
-        free(old_name);
-        return; // Avbryt direkt
-    }
-
+    
     // 2. Fråga användaren om de nya värdena
     char *name = ask_question_string("New name: ");
     char *desc = ask_question_string("New description: ");
@@ -150,26 +142,28 @@ void ui_edit_merch(wh_t *db)
     if (confirm_edit(name, desc, price)) {
         
         // Utför själva ändringen i lagret
-        bool success = ioopm_wh_edit_merch(db, old_name, name, desc, price);
+        int success = ioopm_wh_edit_merch(db, old_name, name, desc, price);
 
-        if (success) {
+        if (success==0) {
             printf("Merch edited successfully!\n");
-        } else {
+        } else if (success == -2) {
             printf("Name is already in use.\n");
-            // Om lagret vägrade ta emot ändringen måste vi städa de nya strängarna
-            free(name);
-            free(desc);
+        } else if (success==-1){
+            printf("Merch doesn't exist\n");
+        } else if (success==-4){
+            printf("Merch is already reserved in a cart\n");
+            
         }
-    } 
-    else {
+    } else {
         printf("Edit cancelled.\n");
         // Användaren tryckte nej, så vi måste städa bort det de precis knappade in
-        free(name);
-        free(desc);
     }
 
     // Det gamla namnet behövs inte längre
+    free(name);
+    free(desc);
     free(old_name);
+    return;
 }
 
 void ui_replenish(wh_t* db){
@@ -234,6 +228,8 @@ void ui_remove_cart(wh_t* db){
 }
 
 void ui_add_to_cart(wh_t* db){
+      printf("--------------------\n");
+      printf("     ADD TO CART    \n");
     int id = ask_question_int("\nCart ID: ");
     char* merch_name = ask_question_string("\nMerch: ");
     int quantity = ask_question_int("\nQuantity: ");
@@ -245,7 +241,7 @@ void ui_add_to_cart(wh_t* db){
         return;
     } if (result==-3){
         printf("Not enough items in stock\n");
-    } else {
+    } else if (result==0) {
         printf("%d %s was added to cart %d\n", quantity, merch_name, id);
     }
     free(merch_name);
@@ -253,8 +249,33 @@ void ui_add_to_cart(wh_t* db){
 }
 
 
+void ui_calculate_cost(wh_t* db){
+    printf("--------------------\n");
+    printf("   CALCULATE COST   \n");
+    int id = ask_question_int("Cart id: ");
+    int result = ioopm_wh_calculate_cost(db, id);
+    if (result ==-1){
+        printf("Cart ID doesn't exist\n");
+        return;
+    }
+    printf("Price of cart %d: %d\n", id, result);
+    return;
+}
+
+void ui_checkout(wh_t* db){
+        printf("--------------------\n");
+        printf("      CHECKOUT      \n");
+    int id = ask_question_int("\nCart ID: ");
+    bool success = ioopm_wh_cart_checkout(db, id);
+
+    if (!success){
+        printf("Cart ID doesn't exist\n");
+        return;
+    }
+    printf("Checkout complete\n");
 
 
+}
 
 
 void event_loop(wh_t* db)
@@ -293,13 +314,18 @@ void event_loop(wh_t* db)
     if (answer=='+'){
         ui_add_to_cart(db);
     }
+    if (answer=='='){
+        ui_calculate_cost(db);
+    }
 
     }
 }
 
+
+
 //bara för att testa list funktionerna, går ej att freea dom elr deras fält då dom ej är dynamiskt allokerade
 static void stock(wh_t* db){
-    ioopm_wh_add_merch(db, "Kaffe", "Mörkrost", 10);
+    ioopm_wh_add_merch(db, strdup("Kaffe"), strdup("Mörkrost"), 10);
     ioopm_wh_add_merch(db, "Te", "Svart", 5);
     ioopm_wh_add_merch(db, "Olivia", "lol", 5);
 }
