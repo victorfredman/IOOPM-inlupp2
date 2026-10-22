@@ -79,7 +79,7 @@ ioopm_list_t *ioopm_show_stock(wh_t *db, char *merch_name);
 /// @note Pre-cond: Both name and desc must be dynamically allocated on the heap
 /// @note Post-cond: On success, the warehouse takes ownership of name and desc, and the caller must not free them.
 /// @note Post-cond: On fail, the ownership is not transferred.
-/// @return A status code false or true
+/// @return 0 if succsess, -1 if the merch doesn't exist, -2 if the cart id doesn't exist, -4 if the merch is reserved in a cart
 int ioopm_wh_edit_merch(wh_t *wh, char *old_name, char* name, char* desc, int price);
 
 /// @brief Replenishes the stock of a merchandise on a specific shelf. Creates the shelf if it does not exist.
