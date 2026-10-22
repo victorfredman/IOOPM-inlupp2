@@ -61,7 +61,7 @@ static cart_t *create_cart(int id){
     return cart;
 }
 
-merch_t* create_merch(char* name, char* desc, int price){
+static merch_t* create_merch(char* name, char* desc, int price){
     merch_t *merch = calloc(1, sizeof(merch_t));
 
     if (merch == NULL) {
@@ -130,7 +130,7 @@ void ioopm_wh_destroy(wh_t *wh){
     free(wh);
 }
 
-void merch_destroy(merch_t *merch)
+static void merch_destroy(merch_t *merch)
 {
     if (merch == NULL) {
         return;
@@ -277,27 +277,23 @@ ioopm_list_t *ioopm_wh_list_merchandise(wh_t *wh){
 int ioopm_wh_edit_merch(wh_t *wh, char *old_name, char* name, char* desc, int price)
 {
     elem_t result;
-
+    //Finns i en kundvagn
     merch_t* merch = ioopm_wh_get_merch(wh, old_name);
     if (merch->reserved>0){
         return -4;
     }
 
-
+    //Finns inte merch
     if (!ioopm_hash_table_lookup(wh->name_to_merch, string_elem(old_name), &result)){
         return -1;
     }
 
+     //Man vill ändra namnet till en annan varas namn
     if (strcmp(old_name, name) != 0 && ioopm_hash_table_has_key(wh->name_to_merch, string_elem(name))){
         return -2;
     }
 
     merch_t *old_merch = result.p;
-
-    if (old_merch->reserved > 0) {
-    // Varan ligger i minst en kundvagn! Vi tillåter inte redigering.
-    return false;
-    }
 
     ioopm_hash_table_remove(wh->name_to_merch, string_elem(old_name));
 
