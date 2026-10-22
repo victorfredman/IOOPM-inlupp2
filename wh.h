@@ -106,7 +106,7 @@ void ioopm_wh_remove_cart(wh_t *wh, int cart_id);
 /// @param merch_name The name of the merchandise.
 /// @param quantity The amount to be added to the cart.
 /// @return A bool that represents if the adding was successfull or not
-bool ioopm_wh_add_to_cart(wh_t* db, int cart_id, char* merch_name, int quantity);
+int ioopm_wh_add_to_cart(wh_t* db, int cart_id, char* merch_name, int quantity);
 
 /// @brief Getter function to help ui.c to get the right values
 /// @param merch the merch you want to collect information from
@@ -119,7 +119,7 @@ char *ioopm_merch_get_name(merch_t *merch);
 int ioopm_merch_get_price(merch_t *merch);
 
 /// @brief Getter function to help ui.c to get the right values
-/// @param merch the merch you want to collect information from 
+/// @param merch the merch you want to collect information from
 /// @return The description of the merch
 char *ioopm_merch_get_desc(merch_t *merch);
 
@@ -142,3 +142,5 @@ bool ioopm_wh_remove_from_cart(wh_t *db, int cart_id, char* merch_name, int quan
 /// @param cart_id The ID of the shopping cart
 /// @return The total cost of the shopping cart
 int ioopm_wh_calculate_cost(wh_t *db, int cart_id);
+
+bool ioopm_wh_cart_checkout(wh_t *wt, int cart_id);

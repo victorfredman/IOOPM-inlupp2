@@ -111,7 +111,7 @@ answer_t ask_question(char *question, check_func *check, convert_func *convert)
    char buf[buf_size];
 
    do {
-    printf("%s\n", question);
+    printf("%s", question);
     read_string(buf, buf_size);
 
    }
