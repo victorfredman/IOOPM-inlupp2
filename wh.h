@@ -85,7 +85,7 @@ ioopm_list_t *ioopm_show_stock(wh_t *db, char *merch_name);
 /// @param old_name The current name of the merchandise.
 /// @param edit A merch_t struct (or pointer) containing the new information.
 /// @return A status code false or true
-bool ioopm_wh_edit_merch(wh_t *wh, char *old_name, char* name, char* desc, int price);
+int ioopm_wh_edit_merch(wh_t *wh, char *old_name, char* name, char* desc, int price);
 
 /// @brief Replenishes the stock of a merchandise on a specific shelf. Creates the shelf if it does not exist.
 /// @param wh Pointer to the warehouse.
@@ -122,6 +122,12 @@ int ioopm_merch_get_price(merch_t *merch);
 /// @param merch the merch you want to collect information from 
 /// @return The description of the merch
 char *ioopm_merch_get_desc(merch_t *merch);
+
+char *ioopm_shelf_get_name(shelf_t *shelf);
+
+size_t ioopm_shelf_get_size(shelf_t *shelf);
+
+ioopm_hash_table_t *ioopm_db_get_carts(wh_t *db);
 
 /// @brief Removes a number of items from the cart
 /// @param db pointer to the warehouse

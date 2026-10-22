@@ -96,9 +96,6 @@ void ioopm_list_insert(ioopm_list_t *list, size_t index, elem_t value){
     if (index>ioopm_list_size(list)){
         return;
     }
-     if (index<0){
-        return;
-    }
 //om tom lägg i början
     if (index==0){
         ioopm_list_prepend(list, value);
