@@ -10,6 +10,13 @@
 #include "linked_list.h"
 #include "common.h"
 
+/**
+ * @file wh.h
+ * @brief Gränssnitt för lagersystemets backend.
+ * 
+ * Innehåller alla funktioner för att hantera varor, hyllor och kundvagnar.
+ */
+
 /// @brief Represents a specific merchandise item in the warehouse.
 typedef struct merch merch_t;
 

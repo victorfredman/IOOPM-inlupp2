@@ -36,6 +36,17 @@ void test_add_merch(){
     
 }
 
+void test_add_remove_merch(){
+
+  wh_t *wt = ioopm_wh_create();
+  bool result = ioopm_wh_add_merch(wt, "Banan", "Gul frukt", 10);
+  CU_ASSERT_TRUE(result);
+  bool result1 = ioopm_wh_remove_merch(wt, "Banan");
+  CU_ASSERT_TRUE(result1);
+  ioopm_wh_destroy(wt);
+    
+}
+
 void test_replenish(void) {
   wh_t *wt = ioopm_wh_create();
   
@@ -110,8 +121,8 @@ void test_remove_cart_and_memory(void) {
     
     ioopm_wh_remove_cart(wh, cart_id);
 
-    bool add_result = ioopm_wh_add_to_cart(wh, cart_id, "Banan", 1);
-    CU_ASSERT_FALSE(add_result);
+    int add_result = ioopm_wh_add_to_cart(wh, cart_id, "Banan", 1);
+    CU_ASSERT_EQUAL(add_result, -1);
 
     ioopm_wh_destroy(wh);
 }
@@ -123,7 +134,7 @@ void test_add_merch_to_cart(void){
   ioopm_wh_add_merch(wt, "Banan", "Gott", 10);
   ioopm_wh_replenish(wt, "Banan", "A1", 10);
   bool result = ioopm_wh_add_to_cart(wt, cart, "Banan", 1);
-  CU_ASSERT_TRUE(result);
+  CU_ASSERT_EQUAL(result, 0);
 
   ioopm_wh_destroy(wt);
 }
@@ -137,7 +148,7 @@ void test_remove_merch_from_cart(void){
   bool result = ioopm_wh_add_to_cart(wt, cart, "Banan", 1);
   bool result1 = ioopm_wh_remove_from_cart(wt, cart, "Banan", 1);
   bool result2 = ioopm_wh_remove_from_cart(wt, cart, "Banan", 2);
-  CU_ASSERT_TRUE(result);
+  CU_ASSERT_EQUAL(result, 0);
   CU_ASSERT_TRUE(result1);
   CU_ASSERT_FALSE(result2);
 
@@ -194,6 +205,11 @@ int main() {
   
   
   if (CU_add_test(my_test_suite, "test_add_merch", test_add_merch) == NULL) {
+    CU_cleanup_registry();
+    return CU_get_error();
+  }
+
+  if (CU_add_test(my_test_suite, "test_add_remove_merch", test_add_remove_merch) == NULL) {
     CU_cleanup_registry();
     return CU_get_error();
   }
