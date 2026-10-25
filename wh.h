@@ -127,6 +127,8 @@ char *ioopm_merch_get_desc(merch_t *merch);
 
 char *ioopm_shelf_get_name(shelf_t *shelf);
 
+int ioopm_merch_get_reserved(merch_t *merch);
+
 size_t ioopm_shelf_get_size(shelf_t *shelf);
 
 ioopm_hash_table_t *ioopm_db_get_carts(wh_t *db);

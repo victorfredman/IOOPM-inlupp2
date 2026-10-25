@@ -465,7 +465,7 @@ int ioopm_wh_calculate_cost(wh_t *db, int cart_id){
         elem_t value = ioopm_hash_table_iterator_current_value(it);
 
         char *merch_name = key.s;
-        printf("%s", merch_name);
+       // printf("%s", merch_name);
         int quantity = value.i;
 
         merch_t *merch = ioopm_wh_get_merch(db, merch_name);
@@ -533,6 +533,11 @@ char *ioopm_merch_get_name(merch_t *merch) {
 
 int ioopm_merch_get_price(merch_t *merch) {
     return merch->price;
+}
+
+
+int ioopm_merch_get_reserved(merch_t *merch) {
+    return merch->reserved;
 }
 
 char *ioopm_merch_get_desc(merch_t *merch) {

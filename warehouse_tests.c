@@ -176,6 +176,28 @@ void test_calculate_cost(void){
   ioopm_wh_destroy(wt);
 }
 
+void test_checkout(void) {
+    wh_t *wt = ioopm_wh_create();
+
+    ioopm_wh_add_merch(wt, "Banan", "Gott", 10);
+    ioopm_wh_replenish(wt, "Banan", "A1", 10);
+
+    int cart = ioopm_wh_create_cart(wt);
+    CU_ASSERT_EQUAL(ioopm_wh_add_to_cart(wt, cart, "Banan", 10), 0);
+
+    bool checkout = ioopm_wh_cart_checkout(wt, cart);
+    CU_ASSERT_TRUE(checkout);
+
+    CU_ASSERT_FALSE(ioopm_wh_cart_checkout(wt, cart));
+    CU_ASSERT_EQUAL(ioopm_wh_add_to_cart(wt, cart, "Banan", 1), -1);
+
+    merch_t *merch = ioopm_wh_get_merch(wt, "Banan");
+    CU_ASSERT_PTR_NOT_NULL(merch);
+    CU_ASSERT_EQUAL(ioopm_merch_get_reserved(merch), 0);
+
+    ioopm_wh_destroy(wt);
+}
+
 
 int main() {
   if (CU_initialize_registry() != CUE_SUCCESS) {
@@ -250,6 +272,11 @@ int main() {
   }
 
   if (CU_add_test(my_test_suite, "test_calculate_cost", test_calculate_cost) == NULL) {
+    CU_cleanup_registry();
+    return CU_get_error();
+  }
+
+  if (CU_add_test(my_test_suite, "test_checkout", test_checkout) == NULL) {
     CU_cleanup_registry();
     return CU_get_error();
   }
