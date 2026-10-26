@@ -100,6 +100,9 @@ void ioopm_wh_destroy(wh_t *wh){
 
         ioopm_list_destroy(merch->locations);
 
+        free(merch->name);
+        free(merch->desc);
+
         free(merch);
 
         ioopm_hash_table_iterator_advance(it);
@@ -203,14 +206,12 @@ bool ioopm_wh_remove_merch(wh_t *wh, char *name)
 
 bool ioopm_wh_replenish(wh_t *wh, char *merch_name, char *shelf_name, int quantity)
 {
-    // 1. Kolla om varan finns
     elem_t merch_result;
     if (!ioopm_hash_table_lookup(wh->name_to_merch, string_elem(merch_name), &merch_result)) {
         return false;
     }
     merch_t *merch = merch_result.p;
 
-    // 2. Kolla vem som äger hyllan (om den redan finns)
     elem_t shelf_result;
     if (ioopm_hash_table_lookup(wh->shelf_to_name, string_elem(shelf_name), &shelf_result)) {
         char *current_merch_on_shelf = shelf_result.s;
@@ -218,13 +219,11 @@ bool ioopm_wh_replenish(wh_t *wh, char *merch_name, char *shelf_name, int quanti
         if (strcmp(current_merch_on_shelf, merch_name) != 0) {
             return false;
         }
-    } // <-- Här tog jag bort det extra } som stängde funktionen för tidigt!
+    }
 
-    // 3. Leta i varans befintliga hyllor
     bool shelf_found = false;
     ioopm_list_iterator_t *it = ioopm_list_iterator_create(merch->locations); 
 
-    // VIKTIGT: "Så länge vi INTE är i slutet" (märk utropstecknet!)
     while (!ioopm_list_iterator_at_end(it)) {
 
         shelf_t *current_shelf = ioopm_list_iterator_current(it).p; 
@@ -239,7 +238,6 @@ bool ioopm_wh_replenish(wh_t *wh, char *merch_name, char *shelf_name, int quanti
     
     ioopm_list_iterator_destroy(it);
 
-    // 4. Lägg till hyllan om den var ny
     if (!shelf_found) {
         shelf_t *new_shelf = calloc(1, sizeof(shelf_t));
         new_shelf->name = strdup(shelf_name); 
@@ -300,8 +298,8 @@ int ioopm_wh_edit_merch(wh_t *wh, char *old_name, char* name, char* desc, int pr
     free(old_merch->name);
     free(old_merch->desc);
 
-    old_merch->name = strdup(name);
-    old_merch->desc = strdup(desc);
+    old_merch->name = name;
+    old_merch->desc = desc;
     old_merch->price = price;
 
     ioopm_hash_table_insert(wh->name_to_merch,string_elem(old_merch->name),ptr_elem(old_merch));
@@ -326,7 +324,7 @@ ioopm_list_t *ioopm_show_stock(wh_t *db, char *merch_name){
     return merch->locations;
 }
 
-int wh_count_stock(merch_t *merch){
+static int wh_count_stock(merch_t *merch){
     int total = 0;
 
     ioopm_list_iterator_t *it =
