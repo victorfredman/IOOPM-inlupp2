@@ -135,15 +135,25 @@ char *ask_question_string(char *question)
   return ask_question(question, not_empty, make_string).string_value;
 }
 
-/*char *ask_question_string(char *question, char *buf, int buf_siz){
-    int len = 0;
+bool shelf_check(char *str){
 
-    do{
+    if(!isalpha(str[0]) || strlen(str) < 2){
 
-        printf("%s\n", question);
-        len = read_string(buf, buf_siz);
+        return false;
+
     }
-    while(len == 0);
+    for(size_t i = 1; i < strlen(str); i++){
+        
+        if(!isdigit(str[i])){
 
-    return buf;
-}*/
+            return false;
+
+        }
+    }
+    return true;
+
+}
+
+char *ask_question_shelf(char *question){
+    return ask_question(question, shelf_check, make_string).string_value;
+}

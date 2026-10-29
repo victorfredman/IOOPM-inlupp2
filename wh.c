@@ -19,9 +19,7 @@ struct merch {
     char *name;
     char *desc;
     int price;
-    int reserved; /*Lade till denna så vi kan hålla koll på hur många av denna 
-    produkt som ligger i en annan varukorg, eftersom alla varukorgar måste kunnna
-    Checkas ut samtidigt*/
+    int reserved;
     ioopm_list_t *locations;
 };
 
@@ -47,9 +45,8 @@ wh_t* ioopm_wh_create(void){
     wh->name_to_merch = ioopm_hash_table_create(ioopm_string_knr_hash, ioopm_string_eq);
     wh->shelf_to_name = ioopm_hash_table_create(ioopm_string_knr_hash, ioopm_string_eq);
     wh->carts = ioopm_hash_table_create(ioopm_int_knr_hash, ioopm_int_eq);
-    wh->carts_id = 1; //Behövs så vi slipper leta igenom alla carts för att hitta ett ledigt id
+    wh->carts_id = 1;
     return wh;
-    //om wh=null???
 }
 
 static cart_t *create_cart(int id){
@@ -181,7 +178,6 @@ bool ioopm_wh_remove_merch(wh_t *wh, char *name)
     }
 
     if (m->reserved > 0) {  
-    // Varan ligger i minst en kundvagn! Vi tillåter inte redigering.
     return false;
     }
 
@@ -276,19 +272,16 @@ int ioopm_wh_edit_merch(wh_t *wh, char *old_name, char* name, char* desc, int pr
 {
     elem_t result;
 
-     //Finns inte merch
     if (!ioopm_hash_table_lookup(wh->name_to_merch, string_elem(old_name), &result)){
         return -1;
     }
 
-    //Finns i en kundvagn
     merch_t *old_merch = result.p;
 
     if (old_merch->reserved>0){
         return -4;
     }
 
-     //Man vill ändra namnet till en annan varas namn
     if (strcmp(old_name, name) != 0 && ioopm_hash_table_has_key(wh->name_to_merch, string_elem(name))){
         return -2;
     }
@@ -322,9 +315,8 @@ ioopm_list_t *ioopm_show_stock(wh_t *db, char *merch_name){
     merch_t* merch = ioopm_wh_get_merch(db, merch_name);
 
     if (merch == NULL) {
-    return NULL; // Eller returnera något som betyder "finns inte"
+    return NULL;
 }
-
     return merch->locations;
 }
 
@@ -417,23 +409,23 @@ bool ioopm_wh_remove_from_cart(wh_t *db, int cart_id, char* merch_name, int quan
 
 
 int ioopm_wh_add_to_cart(wh_t* db, int cart_id, char* merch_name, int quantity){
-    //om id ej finns
+
     if (!ioopm_hash_table_has_key(db->carts, int_elem(cart_id))){
         return -1;
     }
-    //om varan man vill lägga till ej finns
+
     if (!ioopm_hash_table_has_key(db->name_to_merch, string_elem(merch_name))){
         return -2;
     }
-    //annars finns båda
+
     cart_t* cart = get_cart(db, cart_id);
-    //finns de tillräckligt många?
+
     merch_t* merch = ioopm_wh_get_merch(db, merch_name);
 
     if (!enough_in_stock(merch, quantity)){
         return -3;
     }
-    //Upptaderade denna så att den adderar i varukorgen om produkten fanns, sen även adderar quantity på reserved så vi vet när vi adderar andra korgar
+
     elem_t current_qty_elem;
     if (ioopm_hash_table_lookup(cart->items, string_elem(merch->name), &current_qty_elem)) {
         int new_total = current_qty_elem.i + quantity;
@@ -441,8 +433,7 @@ int ioopm_wh_add_to_cart(wh_t* db, int cart_id, char* merch_name, int quantity){
     } else {
         ioopm_hash_table_insert(cart->items, string_elem(merch->name), int_elem(quantity));
     }
-    
-    // 5. Lås varorna så ingen annan kund kan ta dem!
+
     merch->reserved += quantity;
     return 0;
 }
@@ -467,7 +458,6 @@ int ioopm_wh_calculate_cost(wh_t *db, int cart_id){
         elem_t value = ioopm_hash_table_iterator_current_value(it);
 
         char *merch_name = key.s;
-       // printf("%s", merch_name);
         int quantity = value.i;
 
         merch_t *merch = ioopm_wh_get_merch(db, merch_name);
@@ -528,7 +518,6 @@ bool ioopm_wh_cart_checkout(wh_t *wt, int cart_id){
     return true;
 }
 
-//Getters för att kunna hämta ut objekt i ui.c filen, för jag har flyttat struktarna till denna fil nu
 char *ioopm_merch_get_name(merch_t *merch) {
     return merch->name;
 }

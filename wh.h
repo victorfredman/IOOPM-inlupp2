@@ -14,7 +14,7 @@
  * @file wh.h
  * @brief Gränssnitt för lagersystemets backend.
  * 
- * Innehåller alla funktioner för att hantera varor, hyllor och kundvagnar.
+ * Innehåller alla funktioner för att hantera varor, hyllor och kundvagnar. 
  */
 
 /// @brief Represents a specific merchandise item in the warehouse.
@@ -107,7 +107,7 @@ void ioopm_wh_remove_cart(wh_t *wh, int cart_id);
 /// @param cart_id The ID of the shopping cart.
 /// @param merch_name The name of the merchandise.
 /// @param quantity The amount to be added to the cart.
-/// @return A bool that represents if the adding was successfull or not
+/// @return A negative int if unsuccessful, 0 if successful. (-1 if cart id doesn't exist, -2 if merch doesn't exist, -3 if quantity>stock)
 int ioopm_wh_add_to_cart(wh_t* db, int cart_id, char* merch_name, int quantity);
 
 /// @brief Getter function to help ui.c to get the right values
@@ -125,12 +125,19 @@ int ioopm_merch_get_price(merch_t *merch);
 /// @return The description of the merch
 char *ioopm_merch_get_desc(merch_t *merch);
 
+/// @brief Getter function to help ui.c to get the right values
+/// @param shelf the shelf you want to collect information from
+/// @return The name of the shelf
 char *ioopm_shelf_get_name(shelf_t *shelf);
 
-int ioopm_merch_get_reserved(merch_t *merch);
-
+/// @brief Getter function to help ui.c to get the right values
+/// @param shelf the shelf you want to collect information from
+/// @return The size/current quantity of the shelf
 size_t ioopm_shelf_get_size(shelf_t *shelf);
 
+/// @brief Getter function to help ui.c to get the right values
+/// @param db the warehouse to collect information from
+/// @return the hash table with all carts in the warehouse
 ioopm_hash_table_t *ioopm_db_get_carts(wh_t *db);
 
 /// @brief Removes a number of items from the cart
@@ -147,4 +154,8 @@ bool ioopm_wh_remove_from_cart(wh_t *db, int cart_id, char* merch_name, int quan
 /// @return The total cost of the shopping cart
 int ioopm_wh_calculate_cost(wh_t *db, int cart_id);
 
-bool ioopm_wh_cart_checkout(wh_t *wt, int cart_id);
+/// @brief Do checkout of a cart
+/// @param db pointer to the warehouse, 
+/// @param cart_id The ID of the shopping cart
+/// @return The total cost of the shopping cart
+bool ioopm_wh_cart_checkout(wh_t *db, int cart_id);
