@@ -35,9 +35,8 @@ void print_menu(){
     printf("(Q) Quit\n");
 };
 
-
-
 char ask_question_menu(void){
+
     const char *valid_chars = "ALTDREGPCHSQ+-=O";
     
     while (true){
@@ -66,6 +65,7 @@ char ask_question_menu(void){
 }
 
 void ui_add_merch(wh_t* db){
+
     printf("--------------------\n");
     printf("      ADD MERCH     \n");
     char* name = ask_question_string("Name: ");
@@ -82,6 +82,7 @@ void ui_add_merch(wh_t* db){
 }
 
 void ui_list_merch(wh_t *db){
+
     printf("--------------------\n");
     printf("       MERCH:     \n");
     ioopm_list_t *merch_list = ioopm_wh_list_merchandise(db);
@@ -97,8 +98,8 @@ void ui_list_merch(wh_t *db){
     ioopm_list_destroy(merch_list);
 }
 
-void ui_remove_merch(wh_t *db)
-{
+void ui_remove_merch(wh_t *db){
+
     printf("--------------------\n");
     printf("    REMOVE MERCH     \n");
     char *name = ask_question_string("Merch to remove: ");
@@ -118,6 +119,7 @@ void ui_remove_merch(wh_t *db)
 }
 
 static bool confirm_edit(char *name, char *desc, int price){
+
     printf("\nEdited merch:");
     printf("\nName: %s", name);
     printf("\nDescription: %s", desc);
@@ -134,15 +136,12 @@ void ui_edit_merch(wh_t *db)
     printf("     EDIT MERCH     \n");
     char *old_name = ask_question_string("Choose merch to edit: ");
     
-    // 2. Fråga användaren om de nya värdena
     char *name = ask_question_string("New name: ");
     char *desc = ask_question_string("New description: ");
     int price = ask_question_int("New price: ");
 
-    // 3. Anropa din snygga confirm_edit-funktion!
     if (confirm_edit(name, desc, price)) {
         
-        // Utför själva ändringen i lagret
         int success = ioopm_wh_edit_merch(db, old_name, name, desc, price);
 
         if (success==0) {
@@ -157,10 +156,8 @@ void ui_edit_merch(wh_t *db)
         }
     } else {
         printf("Edit cancelled.\n");
-        // Användaren tryckte nej, så vi måste städa bort det de precis knappade in
     }
 
-    // Det gamla namnet behövs inte längre
     free(name);
     free(desc);
     free(old_name);
@@ -168,8 +165,9 @@ void ui_edit_merch(wh_t *db)
 }
 
 void ui_replenish(wh_t* db){
+
     char* merch_name = ask_question_string("Merch: ");
-    char* shelf_name = ask_question_string("Shelf: ");
+    char* shelf_name = ask_question_shelf("Shelf: ");
     int increase = ask_question_int("Increase by: ");
 
     if (!ioopm_wh_replenish(db, merch_name, shelf_name, increase)){
@@ -184,6 +182,7 @@ void ui_replenish(wh_t* db){
     }
 
 void ui_show_stock(wh_t* db){
+
     printf("--------------------\n");
     printf("      SHOW STOCK    \n");
     char* answer= ask_question_string("Merch: ");
@@ -203,11 +202,10 @@ void ui_show_stock(wh_t* db){
      ioopm_list_iterator_destroy(iter);
     }
     free(answer);
-
-   
 }
 
 void ui_create_cart(wh_t *db){
+
     printf("--------------------\n");
     printf("     CREATE CART    \n");
 
@@ -217,11 +215,12 @@ void ui_create_cart(wh_t *db){
 }
 
 void ui_remove_cart(wh_t* db){
+
     printf("--------------------\n");
     printf("     REMOVE CART    \n");
     int id = ask_question_int("ID to remove: ");
     if (!ioopm_hash_table_has_key(ioopm_db_get_carts(db), int_elem(id))){
-        printf("ID %d doesn't exist", id);
+        printf("ID %d doesn't exist\n", id);
     }
     else {
         ioopm_hash_table_remove(ioopm_db_get_carts(db), int_elem(id));
@@ -230,6 +229,7 @@ void ui_remove_cart(wh_t* db){
 }
 
 void ui_add_to_cart(wh_t* db){
+
       printf("--------------------\n");
       printf("     ADD TO CART    \n");
     int id = ask_question_int("\nCart ID: ");
@@ -249,7 +249,6 @@ void ui_add_to_cart(wh_t* db){
     free(merch_name);
     return;
 }
-
 
 void ui_calculate_cost(wh_t* db){
     printf("--------------------\n");
@@ -293,10 +292,7 @@ void ui_checkout(wh_t* db){
         return;
     }
     printf("Checkout complete\n");
-
-
 }
-
 
 void event_loop(wh_t* db)
 {
@@ -351,19 +347,8 @@ void event_loop(wh_t* db)
     }
 }
 
-
-
-//bara för att testa list funktionerna, går ej att freea dom elr deras fält då dom ej är dynamiskt allokerade
-/*static void stock(wh_t* db){
-    ioopm_wh_add_merch(db, strdup("Kaffe"), strdup("Mörkrost"), 10);
-    ioopm_wh_add_merch(db, "Te", "Svart", 5);
-    ioopm_wh_add_merch(db, "Olivia", "lol", 5);
-}*/
-
-
 int main(){
     wh_t *wh = ioopm_wh_create();
-    //stock(wh);
     event_loop(wh);
     ioopm_wh_destroy(wh);
 }
