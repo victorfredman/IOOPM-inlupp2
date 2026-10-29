@@ -64,6 +64,13 @@ char ask_question_menu(void){
     }
 }
 
+static bool confirm(){
+    char *answer = ask_question_string("(Y) Confirm?: ");
+    bool confirmed = toupper(answer[0]) == 'Y';
+    free(answer);
+    return confirmed;
+}
+
 void ui_add_merch(wh_t* db){
 
     printf("--------------------\n");
@@ -103,32 +110,28 @@ void ui_remove_merch(wh_t *db){
     printf("--------------------\n");
     printf("    REMOVE MERCH     \n");
     char *name = ask_question_string("Merch to remove: ");
+    bool confirmed = confirm();
     merch_t *merch =ioopm_wh_get_merch(db, name);
     if (merch == NULL) {
         printf("Merch doesn't exist\n");
         free(name);
         return;
     }
+
+    if (confirmed){
     if (ioopm_wh_remove_merch(db, name)) {
         printf("Merch has been removed\n");
     } else {
         printf("Could not remove merch\n");
     }
+    } else {
+        printf("Removal cancelled\n");
+    }
 
     free(name);
 }
 
-static bool confirm_edit(char *name, char *desc, int price){
 
-    printf("\nEdited merch:");
-    printf("\nName: %s", name);
-    printf("\nDescription: %s", desc);
-    printf("\nPrice: %d\n", price);
-    char *answer = ask_question_string("(Y) Confirm edit?: ");
-    bool confirmed = toupper(answer[0]) == 'Y';
-    free(answer);
-    return confirmed;
-}
 
 void ui_edit_merch(wh_t *db)
 {
@@ -140,7 +143,7 @@ void ui_edit_merch(wh_t *db)
     char *desc = ask_question_string("New description: ");
     int price = ask_question_int("New price: ");
 
-    if (confirm_edit(name, desc, price)) {
+    if (confirm()) {
         
         int success = ioopm_wh_edit_merch(db, old_name, name, desc, price);
 
@@ -225,8 +228,11 @@ void ui_remove_cart(wh_t* db){
         printf("ID %d doesn't exist\n", id);
     }
     else {
+        bool confirmed = confirm();
+        if(confirmed){
         ioopm_hash_table_remove(ioopm_db_get_carts(db), int_elem(id));
         printf("Cart (ID:%d) removed\n", id);
+        }
     }
 }
 
@@ -342,8 +348,11 @@ void event_loop(wh_t* db)
         ui_checkout(db);
     }
     if (answer=='Q') {
-        printf("Closes the program\n");
+        bool confirmed = confirm();
+        if (confirmed){
+             printf("Closes the program\n");
         break;
+        }
     }
 
     }
