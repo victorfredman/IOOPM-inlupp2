@@ -32,12 +32,13 @@ void print_menu(){
     printf("(-) Remove from cart\n");
     printf("(=) Calculate cost\n");
     printf("(O) Checkout\n");
+    printf("(Q) Quit\n");
 };
 
 
 
 char ask_question_menu(void){
-    const char *valid_chars = "ALTDREGPCHS+-=O";
+    const char *valid_chars = "ALTDREGPCHSQ+-=O";
     
     while (true){
         print_menu();
@@ -201,6 +202,7 @@ void ui_show_stock(wh_t* db){
     }
      ioopm_list_iterator_destroy(iter);
     }
+    free(answer);
 
    
 }
@@ -341,6 +343,10 @@ void event_loop(wh_t* db)
     if (answer=='O'){
         ui_checkout(db);
     }
+    if (answer=='Q') {
+        printf("Closes the program\n");
+        break;
+    }
 
     }
 }
@@ -348,16 +354,16 @@ void event_loop(wh_t* db)
 
 
 //bara för att testa list funktionerna, går ej att freea dom elr deras fält då dom ej är dynamiskt allokerade
-static void stock(wh_t* db){
+/*static void stock(wh_t* db){
     ioopm_wh_add_merch(db, strdup("Kaffe"), strdup("Mörkrost"), 10);
     ioopm_wh_add_merch(db, "Te", "Svart", 5);
     ioopm_wh_add_merch(db, "Olivia", "lol", 5);
-}
+}*/
 
 
 int main(){
     wh_t *wh = ioopm_wh_create();
-    stock(wh);
+    //stock(wh);
     event_loop(wh);
     ioopm_wh_destroy(wh);
 }

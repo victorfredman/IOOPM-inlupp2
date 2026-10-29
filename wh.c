@@ -100,6 +100,9 @@ void ioopm_wh_destroy(wh_t *wh){
 
         ioopm_list_destroy(merch->locations);
 
+        free(merch->name);
+        free(merch->desc);
+
         free(merch);
 
         ioopm_hash_table_iterator_advance(it);
@@ -203,14 +206,12 @@ bool ioopm_wh_remove_merch(wh_t *wh, char *name)
 
 bool ioopm_wh_replenish(wh_t *wh, char *merch_name, char *shelf_name, int quantity)
 {
-    // 1. Kolla om varan finns
     elem_t merch_result;
     if (!ioopm_hash_table_lookup(wh->name_to_merch, string_elem(merch_name), &merch_result)) {
         return false;
     }
     merch_t *merch = merch_result.p;
 
-    // 2. Kolla vem som äger hyllan (om den redan finns)
     elem_t shelf_result;
     if (ioopm_hash_table_lookup(wh->shelf_to_name, string_elem(shelf_name), &shelf_result)) {
         char *current_merch_on_shelf = shelf_result.s;
@@ -218,13 +219,11 @@ bool ioopm_wh_replenish(wh_t *wh, char *merch_name, char *shelf_name, int quanti
         if (strcmp(current_merch_on_shelf, merch_name) != 0) {
             return false;
         }
-    } // <-- Här tog jag bort det extra } som stängde funktionen för tidigt!
+    }
 
-    // 3. Leta i varans befintliga hyllor
     bool shelf_found = false;
     ioopm_list_iterator_t *it = ioopm_list_iterator_create(merch->locations); 
 
-    // VIKTIGT: "Så länge vi INTE är i slutet" (märk utropstecknet!)
     while (!ioopm_list_iterator_at_end(it)) {
 
         shelf_t *current_shelf = ioopm_list_iterator_current(it).p; 
@@ -239,7 +238,6 @@ bool ioopm_wh_replenish(wh_t *wh, char *merch_name, char *shelf_name, int quanti
     
     ioopm_list_iterator_destroy(it);
 
-    // 4. Lägg till hyllan om den var ny
     if (!shelf_found) {
         shelf_t *new_shelf = calloc(1, sizeof(shelf_t));
         new_shelf->name = strdup(shelf_name); 
@@ -277,23 +275,23 @@ ioopm_list_t *ioopm_wh_list_merchandise(wh_t *wh){
 int ioopm_wh_edit_merch(wh_t *wh, char *old_name, char* name, char* desc, int price)
 {
     elem_t result;
-    //Finns i en kundvagn
-    merch_t* merch = ioopm_wh_get_merch(wh, old_name);
-    if (merch->reserved>0){
-        return -4;
-    }
 
-    //Finns inte merch
+     //Finns inte merch
     if (!ioopm_hash_table_lookup(wh->name_to_merch, string_elem(old_name), &result)){
         return -1;
+    }
+
+    //Finns i en kundvagn
+    merch_t *old_merch = result.p;
+
+    if (old_merch->reserved>0){
+        return -4;
     }
 
      //Man vill ändra namnet till en annan varas namn
     if (strcmp(old_name, name) != 0 && ioopm_hash_table_has_key(wh->name_to_merch, string_elem(name))){
         return -2;
     }
-
-    merch_t *old_merch = result.p;
 
     ioopm_hash_table_remove(wh->name_to_merch, string_elem(old_name));
 
@@ -323,10 +321,14 @@ ioopm_list_t *ioopm_show_stock(wh_t *db, char *merch_name){
 
     merch_t* merch = ioopm_wh_get_merch(db, merch_name);
 
+    if (merch == NULL) {
+    return NULL; // Eller returnera något som betyder "finns inte"
+}
+
     return merch->locations;
 }
 
-int wh_count_stock(merch_t *merch){
+static int wh_count_stock(merch_t *merch){
     int total = 0;
 
     ioopm_list_iterator_t *it =
@@ -465,7 +467,7 @@ int ioopm_wh_calculate_cost(wh_t *db, int cart_id){
         elem_t value = ioopm_hash_table_iterator_current_value(it);
 
         char *merch_name = key.s;
-        printf("%s", merch_name);
+       // printf("%s", merch_name);
         int quantity = value.i;
 
         merch_t *merch = ioopm_wh_get_merch(db, merch_name);
@@ -533,6 +535,11 @@ char *ioopm_merch_get_name(merch_t *merch) {
 
 int ioopm_merch_get_price(merch_t *merch) {
     return merch->price;
+}
+
+
+int ioopm_merch_get_reserved(merch_t *merch) {
+    return merch->reserved;
 }
 
 char *ioopm_merch_get_desc(merch_t *merch) {

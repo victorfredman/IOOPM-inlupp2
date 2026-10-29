@@ -114,10 +114,14 @@ answer_t ask_question(char *question, check_func *check, convert_func *convert)
     printf("%s", question);
     read_string(buf, buf_size);
 
+    if (feof(stdin)) {
+        strcpy(buf, "Q"); // Fejka ett Q för att bryta allt och stänga
+        break;
+    }
+
    }
    while(check(buf) == false);
    return convert(buf);
-
 }
 
 int ask_question_int(char *question)

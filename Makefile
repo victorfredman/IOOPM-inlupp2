@@ -12,7 +12,7 @@ VAL = valgrind --leak-check=full
 .PHONY: all test test_cov memtest_hash memtest_freq memtest_linked memtest_warehouse clean ui wh
 
 # Default target
-all: freq_count test_hash test_linked_list test_warehouse
+all: test_warehouse
 
 # ==========================================
 # UI OCH WAREHOUSE TARGETS
@@ -48,6 +48,21 @@ test_linked_list: linked_list_tests.o linked_list.o
 
 test_warehouse: warehouse_tests.o wh.o hash_table.o linked_list.o list_iterator.o hash_table_iterator.o hash_functions.o utils.o
 	$(CC) $(CFLAGS) -o $@ $^ $(CUNIT)
+
+# Gcov test:
+
+coverage_warehouse: clean
+	gcc -Wall -Wextra -g -std=c17 --coverage -c wh.c -o wh.o
+	gcc -Wall -Wextra -g -std=c17 --coverage -c warehouse_tests.c -o warehouse_tests.o
+	gcc -Wall -Wextra -g -std=c17 -c hash_table.c -o hash_table.o
+	gcc -Wall -Wextra -g -std=c17 -c linked_list.c -o linked_list.o
+	gcc -Wall -Wextra -g -std=c17 -c list_iterator.c -o list_iterator.o
+	gcc -Wall -Wextra -g -std=c17 -c hash_table_iterator.c -o hash_table_iterator.o
+	gcc -Wall -Wextra -g -std=c17 -c hash_functions.c -o hash_functions.o
+	gcc -Wall -Wextra -g -std=c17 -c utils.c -o utils.o
+	gcc -Wall -Wextra -g -std=c17 --coverage -o test_warehouse warehouse_tests.o wh.o hash_table.o linked_list.o list_iterator.o hash_table_iterator.o hash_functions.o utils.o -lcunit
+	./test_warehouse
+	gcov -b -c wh.c
 
 # Pattern rule for object files
 %.o: %.c
