@@ -1,3 +1,13 @@
+/**
+ * @file wh.c
+ * @author Victor Fredman & Olivia Emilsson
+ * @date 2026 October
+ * @brief Backend implementation for the webstore.
+ *
+ * This file contains the logic for managing merchandise, 
+ * shelves, and shopping carts using hash tables and linked lists.
+ */
+
 #include "wh.h"
 #include "linked_list_struct.h"
 #include "hash_functions.h"
@@ -339,8 +349,7 @@ static int wh_count_stock(merch_t *merch){
 
 int ioopm_wh_create_cart(wh_t *wh){
 
-    wh->carts_id += 1;
-    int new_id = wh->carts_id;
+    int new_id = wh->carts_id ++;
     cart_t *new_cart = create_cart(new_id);
     ioopm_hash_table_insert(wh->carts, int_elem(new_id), ptr_elem(new_cart));
 
@@ -396,7 +405,7 @@ bool ioopm_wh_remove_from_cart(wh_t *db, int cart_id, char* merch_name, int quan
         ioopm_hash_table_insert(cart->items, string_elem(merch_name), int_elem(current_quantity - quantity));
         merch->reserved -= quantity; 
         return true;
-    }
+    }   
 
     if(quantity == current_quantity){
         ioopm_hash_table_remove(cart->items, string_elem(merch_name));

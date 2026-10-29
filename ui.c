@@ -230,8 +230,8 @@ void ui_remove_cart(wh_t* db){
     else {
         bool confirmed = confirm();
         if(confirmed){
-        ioopm_hash_table_remove(ioopm_db_get_carts(db), int_elem(id));
-        printf("Cart (ID:%d) removed\n", id);
+            ioopm_wh_remove_cart(db, id);
+            printf("Cart (ID:%d) removed\n", id);
         }
     }
 }
