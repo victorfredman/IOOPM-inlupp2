@@ -12,7 +12,7 @@ VAL = valgrind --leak-check=full
 .PHONY: all test test_cov memtest_hash memtest_freq memtest_linked memtest_warehouse clean ui wh
 
 # Default target
-all: freq_count test_hash test_linked_list test_warehouse
+all: test_warehouse
 
 # ==========================================
 # UI OCH WAREHOUSE TARGETS

@@ -275,15 +275,17 @@ ioopm_list_t *ioopm_wh_list_merchandise(wh_t *wh){
 int ioopm_wh_edit_merch(wh_t *wh, char *old_name, char* name, char* desc, int price)
 {
     elem_t result;
-    //Finns i en kundvagn
-    merch_t* merch = ioopm_wh_get_merch(wh, old_name);
-    if (merch->reserved>0){
-        return -4;
-    }
 
-    //Finns inte merch
+     //Finns inte merch
     if (!ioopm_hash_table_lookup(wh->name_to_merch, string_elem(old_name), &result)){
         return -1;
+    }
+
+    //Finns i en kundvagn
+    merch_t *old_merch = result.p;
+
+    if (old_merch->reserved>0){
+        return -4;
     }
 
      //Man vill ändra namnet till en annan varas namn
@@ -291,15 +293,13 @@ int ioopm_wh_edit_merch(wh_t *wh, char *old_name, char* name, char* desc, int pr
         return -2;
     }
 
-    merch_t *old_merch = result.p;
-
     ioopm_hash_table_remove(wh->name_to_merch, string_elem(old_name));
 
     free(old_merch->name);
     free(old_merch->desc);
 
-    old_merch->name = name;
-    old_merch->desc = desc;
+    old_merch->name = strdup(name);
+    old_merch->desc = strdup(desc);
     old_merch->price = price;
 
     ioopm_hash_table_insert(wh->name_to_merch,string_elem(old_merch->name),ptr_elem(old_merch));
@@ -320,6 +320,10 @@ int ioopm_wh_edit_merch(wh_t *wh, char *old_name, char* name, char* desc, int pr
 ioopm_list_t *ioopm_show_stock(wh_t *db, char *merch_name){
 
     merch_t* merch = ioopm_wh_get_merch(db, merch_name);
+
+    if (merch == NULL) {
+    return NULL; // Eller returnera något som betyder "finns inte"
+}
 
     return merch->locations;
 }
