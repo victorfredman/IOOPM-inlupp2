@@ -74,11 +74,11 @@ void ui_add_merch(wh_t* db){
     bool success = ioopm_wh_add_merch(db, name, desc, price);
     if (!success){
         printf("Merch already exists\n");
-        free(name);
-        free (desc);
     } else{
         printf("Merch has been added\n");
     }
+    free(name);
+    free (desc);
 }
 
 void ui_list_merch(wh_t *db){
@@ -166,8 +166,8 @@ void ui_edit_merch(wh_t *db)
 
 void ui_replenish(wh_t* db){
 
-    char* merch_name = ask_question_string("Merch: ");
     char* shelf_name = ask_question_shelf("Shelf: ");
+    char* merch_name = ask_question_string("Merch: ");
     int increase = ask_question_int("Increase by: ");
 
     if (!ioopm_wh_replenish(db, merch_name, shelf_name, increase)){
@@ -187,6 +187,8 @@ void ui_show_stock(wh_t* db){
     printf("      SHOW STOCK    \n");
     char* answer= ask_question_string("Merch: ");
     ioopm_list_t* locs = ioopm_show_stock(db, answer);
+
+    if (locs == NULL) { printf("Merch doesn't exist\n"); free(answer); return; }
 
     if (locs->size ==0){
         printf("No items\n");

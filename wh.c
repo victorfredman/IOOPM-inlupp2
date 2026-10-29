@@ -65,8 +65,8 @@ static merch_t* create_merch(char* name, char* desc, int price){
         return NULL;
     }
 
-    merch->name = name;
-    merch->desc = desc;
+    merch->name = strdup(name);
+    merch->desc = strdup(desc);
     merch->price = price;
     merch->locations = ioopm_list_create();
 
@@ -152,7 +152,7 @@ bool ioopm_wh_add_merch(wh_t *wh, char *name, char *desc, int price){
     }
     merch_t* new_merch = create_merch(name, desc, price);
 
-    ioopm_hash_table_insert(wh->name_to_merch, string_elem(name), ptr_elem(new_merch));
+    ioopm_hash_table_insert(wh->name_to_merch, string_elem(new_merch->name), ptr_elem(new_merch));
     return true;
 }
 
