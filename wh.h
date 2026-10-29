@@ -1,3 +1,12 @@
+/**
+ * @file wh.h
+ * @author Victor Fredman & Olivia Emilsson
+ * @date 2026 October
+ * @brief Gränssnitt för lagersystemets backend.
+ * 
+ * Innehåller alla funktioner för att hantera varor, hyllor och kundvagnar. 
+ */
+
 #pragma once
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,13 +18,6 @@
 #include "hash_table.h"
 #include "linked_list.h"
 #include "common.h"
-
-/**
- * @file wh.h
- * @brief Gränssnitt för lagersystemets backend.
- * 
- * Innehåller alla funktioner för att hantera varor, hyllor och kundvagnar. 
- */
 
 /// @brief Represents a specific merchandise item in the warehouse.
 typedef struct merch merch_t;
@@ -136,6 +138,11 @@ char *ioopm_shelf_get_name(shelf_t *shelf);
 size_t ioopm_shelf_get_size(shelf_t *shelf);
 
 /// @brief Getter function to help ui.c to get the right values
+/// @param merch the merch you want to collect information from
+/// @return The reserved value of the selected merch
+int ioopm_merch_get_reserved(merch_t *merch);
+
+/// @brief Getter function to help ui.c to get the right values
 /// @param db the warehouse to collect information from
 /// @return the hash table with all carts in the warehouse
 ioopm_hash_table_t *ioopm_db_get_carts(wh_t *db);
@@ -159,5 +166,3 @@ int ioopm_wh_calculate_cost(wh_t *db, int cart_id);
 /// @param cart_id The ID of the shopping cart
 /// @return The total cost of the shopping cart
 bool ioopm_wh_cart_checkout(wh_t *db, int cart_id);
-
-int ioopm_merch_get_reserved(merch_t *merch);

@@ -1,3 +1,13 @@
+/**
+ * @file warehouse_tests.c
+ * @author Victor Fredman & Olivia Emilsson
+ * @date 2026-10-29
+ * @brief Test file for wh.c
+ *
+ * This file contains all the tests for the backend file wh.c
+ */
+
+
 #define _XOPEN_SOURCE 700
 #include <CUnit/Basic.h>
 #include "hash_table.h"
