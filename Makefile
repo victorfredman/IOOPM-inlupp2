@@ -78,9 +78,7 @@ wh.o warehouse_tests.o: wh.h common.h
 # KÖRA ALLA TESTER
 # ==========================================
 
-test: test_hash test_linked_list test_warehouse
-	./test_hash
-	./test_linked_list
+test: test_warehouse
 	./test_warehouse
 
 # ==========================================

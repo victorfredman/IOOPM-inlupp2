@@ -159,3 +159,5 @@ int ioopm_wh_calculate_cost(wh_t *db, int cart_id);
 /// @param cart_id The ID of the shopping cart
 /// @return The total cost of the shopping cart
 bool ioopm_wh_cart_checkout(wh_t *db, int cart_id);
+
+int ioopm_merch_get_reserved(merch_t *merch);
