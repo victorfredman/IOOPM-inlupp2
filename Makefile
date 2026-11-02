@@ -30,6 +30,19 @@ coverage_warehouse: clean
 	./test_warehouse
 	gcov -b -c wh.c
 
+coverage_ui: clean
+	gcc -Wall -Wextra -g -std=c17 --coverage -c ui.c -o ui.o
+	gcc -Wall -Wextra -g -std=c17 --coverage -c wh.c -o wh.o
+	gcc -Wall -Wextra -g -std=c17 -c linked_list.c -o linked_list.o
+	gcc -Wall -Wextra -g -std=c17 -c list_iterator.c -o list_iterator.o
+	gcc -Wall -Wextra -g -std=c17 -c hash_table.c -o hash_table.o
+	gcc -Wall -Wextra -g -std=c17 -c hash_table_iterator.c -o hash_table_iterator.o
+	gcc -Wall -Wextra -g -std=c17 -c hash_functions.c -o hash_functions.o
+	gcc -Wall -Wextra -g -std=c17 -c utils.c -o utils.o
+	gcc --coverage -o ui ui.o wh.o linked_list.o list_iterator.o hash_table.o hash_table_iterator.o hash_functions.o utils.o
+	./ui < webstoretest.txt
+	gcov -b -c ui.c wh.c
+
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -40,8 +53,11 @@ wh.o warehouse_tests.o: wh.h common.h
 test: test_warehouse
 	./test_warehouse
 
+run: ui
+	./ui
+
 memtest_warehouse: test_warehouse
 	$(VAL) ./test_warehouse
 
 clean:
-	rm -f *.o test_warehouse ui vgcore.* *.gcno *.gcda *.gcov
+	rm -f *.o test_warehouse ui vgcore.* *.gcno *.gcda *.gcov coverage_ui

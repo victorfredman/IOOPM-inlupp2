@@ -146,17 +146,21 @@ void test_edit_merch(void){
 
 void test_remove_cart_and_memory(void) {
     wh_t *wh = ioopm_wh_create();
-    
+
     ioopm_wh_add_merch(wh, "Banan", "Gul", 10);
     ioopm_wh_replenish(wh, "Banan", "A01", 10);
 
     int cart_id = ioopm_wh_create_cart(wh);
     ioopm_wh_add_to_cart(wh, cart_id, "Banan", 3);
-    
-    ioopm_wh_remove_cart(wh, cart_id);
 
-    int add_result = ioopm_wh_add_to_cart(wh, cart_id, "Banan", 1);
-    CU_ASSERT_EQUAL(add_result, -1);
+    merch_t *m = ioopm_wh_get_merch(wh, "Banan");
+    CU_ASSERT_EQUAL(ioopm_merch_get_reserved(m), 3);
+
+    CU_ASSERT_TRUE(ioopm_wh_remove_cart(wh, cart_id)); 
+    CU_ASSERT_EQUAL(ioopm_merch_get_reserved(m), 0);       
+    CU_ASSERT_FALSE(ioopm_wh_remove_cart(wh, cart_id));    
+
+    CU_ASSERT_EQUAL(ioopm_wh_add_to_cart(wh, cart_id, "Banan", 1), -1);
 
     ioopm_wh_destroy(wh);
 }

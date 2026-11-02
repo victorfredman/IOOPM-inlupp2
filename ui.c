@@ -1,3 +1,14 @@
+/**
+ * @file ui.c
+ * @author Victor Fredman & Olivia Emilsson
+ * @date October 2026
+ * @brief Frontend implementation for the webstore.
+ *
+ * This file contains all the frontend logic such as asking questions and printing
+ * the menu. The UI utilizes wh.c for all the underlying business logic and 
+ * retrieving the correct data from the warehouse. 
+ */
+
 #include "wh.h"
 #include "linked_list_struct.h"
 #include <stdio.h>
@@ -37,7 +48,7 @@ void print_menu(){
 
 char ask_question_menu(void){
 
-    const char *valid_chars = "ALTDREGPCHSQ+-=O";
+    const char *valid_chars = "ALDESPCR+-=OQ";
     
     while (true){
         print_menu();
@@ -93,14 +104,28 @@ void ui_list_merch(wh_t *db){
     printf("--------------------\n");
     printf("       MERCH:     \n");
     ioopm_list_t *merch_list = ioopm_wh_list_merchandise(db);
-    ioopm_list_iterator_t *iter =
-        ioopm_list_iterator_create(merch_list);
-    while (!ioopm_list_iterator_at_end(iter)) {
-        elem_t current = ioopm_list_iterator_current(iter);
-        merch_t *item = current.p;
+    ioopm_list_iterator_t *iter = ioopm_list_iterator_create(merch_list);
+
+    size_t total = ioopm_list_size(merch_list);
+    size_t printed = 0;
+
+      while (!ioopm_list_iterator_at_end(iter)) {
+        merch_t *item = ioopm_list_iterator_current(iter).p;
         printf("%s\n", ioopm_merch_get_name(item));
+        printed++;
+
+        if (printed % 20 == 0 && printed < total) {
+            char buf[255];
+            printf("Continue listing? (N = back to menu): ");
+            int n = read_string(buf, sizeof buf);
+
+            if ((n == 0 && feof(stdin)) || buf[0] == 'N' || buf[0] == 'n') {
+                break;
+            }
+        }
         ioopm_list_iterator_advance(iter);
     }
+
     ioopm_list_iterator_destroy(iter);
     ioopm_list_destroy(merch_list);
 }
@@ -219,20 +244,18 @@ void ui_create_cart(wh_t *db){
     printf("Cart created with ID: %d\n", cart);
 }
 
-void ui_remove_cart(wh_t* db){
-
+void ui_remove_cart(wh_t *db){
     printf("--------------------\n");
     printf("     REMOVE CART    \n");
     int id = ask_question_int("ID to remove: ");
-    if (!ioopm_hash_table_has_key(ioopm_db_get_carts(db), int_elem(id))){
+    bool confirmed = confirm();  
+
+    if (!confirmed) {
+        printf("Removal cancelled\n");
+    } else if (ioopm_wh_remove_cart(db, id)) {
+        printf("Cart (ID:%d) removed\n", id);
+    } else {
         printf("ID %d doesn't exist\n", id);
-    }
-    else {
-        bool confirmed = confirm();
-        if(confirmed){
-            ioopm_wh_remove_cart(db, id);
-            printf("Cart (ID:%d) removed\n", id);
-        }
     }
 }
 
@@ -248,7 +271,6 @@ void ui_add_to_cart(wh_t* db){
         printf("ID doesn't exist\n");
     } if (result==-2){
         printf("\nMerch name doesn't exist\n");
-        return;
     } if (result==-3){
         printf("Not enough items in stock\n");
     } else if (result==0) {
@@ -347,10 +369,9 @@ void event_loop(wh_t* db)
     if (answer=='O'){
         ui_checkout(db);
     }
-    if (answer=='Q') {
-        bool confirmed = confirm();
-        if (confirmed){
-             printf("Closes the program\n");
+    if (answer == 'Q') {
+        if (feof(stdin) || confirm()) {
+        printf("Closes the program\n");
         break;
         }
     }

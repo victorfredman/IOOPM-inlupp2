@@ -86,9 +86,7 @@ ioopm_list_t *ioopm_show_stock(wh_t *db, char *merch_name);
 /// @param price The new price
 /// @note Pre-cond: The merchandise cannot exist in a cart. The name cannot be the same as another merchandise. 
 /// @note Pre-cond: Both name and desc must be dynamically allocated on the heap
-/// @note Post-cond: On success, the warehouse takes ownership of name and desc, and the caller must not free them.
-/// @note Post-cond: On fail, the ownership is not transferred.
-/// @return 0 if succsess, -1 if the merch doesn't exist, -2 if the cart id doesn't exist, -4 if the merch is reserved in a cart
+/// @return 0 if succsess, -1 if the merch doesn't exist, -2 the new name is already in use, -4 if the merch is reserved in a cart
 int ioopm_wh_edit_merch(wh_t *wh, char *old_name, char* name, char* desc, int price);
 
 /// @brief Replenishes the stock of a merchandise on a specific shelf. Creates the shelf if it does not exist.
@@ -102,7 +100,8 @@ bool ioopm_wh_replenish(wh_t *wh, char *merch_name, char *shelf_name, int quanti
 /// @brief Removes a cart from the warehouse
 /// @param wh Pointer to the warehouse  
 /// @param cart_id ID of the cart that will be removed
-void ioopm_wh_remove_cart(wh_t *wh, int cart_id);
+/// @return True if successfull, false if the cart_id doesnt exists.
+bool ioopm_wh_remove_cart(wh_t *wh, int cart_id);
 
 /// @brief Reserves a specified quantity of a merchandise and adds it to a specific shopping cart.
 /// @param db Pointer to the warehouse.
@@ -142,11 +141,6 @@ size_t ioopm_shelf_get_size(shelf_t *shelf);
 /// @return The reserved value of the selected merch
 int ioopm_merch_get_reserved(merch_t *merch);
 
-/// @brief Getter function to help ui.c to get the right values
-/// @param db the warehouse to collect information from
-/// @return the hash table with all carts in the warehouse
-ioopm_hash_table_t *ioopm_db_get_carts(wh_t *db);
-
 /// @brief Removes a number of items from the cart
 /// @param db pointer to the warehouse
 /// @param cart_id The ID of the shopping cart
@@ -164,5 +158,5 @@ int ioopm_wh_calculate_cost(wh_t *db, int cart_id);
 /// @brief Do checkout of a cart
 /// @param db pointer to the warehouse, 
 /// @param cart_id The ID of the shopping cart
-/// @return The total cost of the shopping cart
+/// @return A bool that represents if the checkout was successfull or not
 bool ioopm_wh_cart_checkout(wh_t *db, int cart_id);

@@ -30,7 +30,7 @@ size_t ioopm_int_knr_hash(elem_t key)
 
 bool ioopm_int_eq(elem_t a, elem_t b)
 {
-    return a.i==b.i;
+    return a.i==b.i;    
 }
 
 bool ioopm_string_eq(elem_t a, elem_t b)

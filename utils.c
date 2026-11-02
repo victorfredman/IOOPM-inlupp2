@@ -107,21 +107,21 @@ bool is_number(char *str)
 
 answer_t ask_question(char *question, check_func *check, convert_func *convert)
 {
-   int buf_size = 255;
-   char buf[buf_size];
+    int buf_size = 255;
+    char buf[buf_size];
 
-   do {
-    printf("%s", question);
-    read_string(buf, buf_size);
+    do {
+        printf("%s", question);
+        int n = read_string(buf, buf_size);   
 
-    if (feof(stdin)) {
-        strcpy(buf, "Q"); // Fejka ett Q för att bryta allt och stänga
-        break;
+        if (n == 0 && feof(stdin)) {          
+            strcpy(buf, "Q");                 
+            break;
+        }
     }
+    while (check(buf) == false);
 
-   }
-   while(check(buf) == false);
-   return convert(buf);
+    return convert(buf);
 }
 
 int ask_question_int(char *question)

@@ -16,8 +16,11 @@ We use a `Makefile` to build the programs. Open your terminal and run the follow
 **To compile the program and all tests:**
 `make all`
 
-**To run the main Webstore program:**
+**To Compile the program**
 `make ui`
+
+**To run the main Webstore program:**
+`make run`
 
 **To run all unit tests:**
 `make test`
@@ -31,8 +34,18 @@ We use a `Makefile` to build the programs. Open your terminal and run the follow
 **To clean out all compiled `.o` files (e.g., before pushing to GitHub):**
 `make clean`
 
-## Line and Branch Coverage (wh.c)
-- **Lines executed:** 87.04% of 270
-- **Branches executed:** 100.00% of 78
-- **Taken at least once:** 73.08% of 78
-- **Calls executed:** 95.93% of 123
+## Line and Branch Coverage
+
+Measured with **gcov** (`gcov -b -c`).
+
+### wh.c (CUnit unit tests, `make coverage_warehouse`)
+- **Lines executed:** 87.91% of 273
+- **Branches executed:** 100.00% of 82
+- **Taken at least once:** 75.61% of 82
+- **Calls executed:** 96.15% of 130
+
+### ui.c (course script `webstoretest.txt`, `make coverage_ui`)
+- **Lines executed:** 86.13% of 238
+- **Branches executed:** 84.00% of 100
+- **Taken at least once:** 59.00% of 100
+- **Calls executed:** 85.14% of 148
